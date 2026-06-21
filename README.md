@@ -2,259 +2,244 @@
 
 Plateforme SaaS de gestion du marketing digital qui aide les entreprises à mieux gérer leur marketing en rassemblant en un seul endroit la gestion des contacts, les campagnes (emails, réseaux sociaux, SMS), l'analyse des résultats et l'automatisation des tâches.
 
+**Stack** : Java 21 · Spring Boot 3.5 · PostgreSQL · JWT · Spring Modulith · Maven  
+**Organisation** : [SaaS-Teams](https://github.com/SaaS-Teams)
+
+---
+
 ## 📋 Table des matières
 
-- [Technologies](#technologies)
-- [Prérequis](#prérequis)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Démarrage](#démarrage)
-- [Documentation API](#documentation-api)
-- [Structure du projet](#structure-du-projet)
-- [Profils Spring](#profils-spring)
+1. [Prérequis](#prérequis)
+2. [Installation locale](#installation-locale)
+3. [Structure du projet](#structure-du-projet)
+4. [Modules](#modules)
+5. [Conventions — lire absolument](#conventions--lire-absolument)
+6. [Workflow Git](#workflow-git)
+7. [Pull Requests](#pull-requests)
+8. [CI / CD](#ci--cd)
+9. [Variables d'environnement](#variables-denvironnement)
+10. [Documentation API](#documentation-api)
+11. [Contact & ownership des modules](#contact--ownership-des-modules)
 
-## 🛠 Technologies
-
-- **Java 21**
-- **Spring Boot 3.5.9**
-- **Spring Data JPA**
-- **PostgreSQL**
-- **Spring Modulith**
-- **Swagger/OpenAPI (SpringDoc 2.7.0)**
-- **Lombok**
-- **Maven**
+---
 
 ## 📦 Prérequis
 
-- Java 21 ou supérieur
-- PostgreSQL 12 ou supérieur
-- Maven 3.6+ (ou utiliser le wrapper Maven inclus `./mvnw`)
+| Outil | Version minimale |
+|-------|-----------------|
+| Java (JDK) | 21+ |
+| Maven | 3.9+ |
+| Docker & Docker Compose | 24+ |
+| Git | 2.40+ |
 
-## ⚙️ Installation
+---
 
-### 1. Cloner le projet
-
-```bash
-git clone <url-du-repo>
-cd saas
-```
-
-### 2. Démarrer l'infrastructure locale (Docker)
-
-Il est fortement recommandé d'utiliser Docker pour lancer PostgreSQL, Redis et MailHog localement.
+## ⚙️ Installation locale
 
 ```bash
-# Copier le fichier d'environnement
+# 1. Cloner le repo
+git clone https://github.com/SaaS-Teams/Plateform_Saas_Backend.git
+cd Plateform_Saas_Backend
+
+# 2. Démarrer PostgreSQL avec Docker
+docker-compose up -d
+
+# 3. Copier le fichier d'environnement
 cp .env.example .env
+# Remplir les valeurs dans .env (voir section Variables d'environnement)
 
-# Démarrer les services en arrière-plan
-docker compose --profile dev up -d
-
-# Vérifier que tout tourne
-docker compose ps
-```
-
-<details>
-<summary>Alternative : Installer PostgreSQL manuellement</summary>
-
-```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-
-# Démarrer PostgreSQL
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-```
-</details>
-
-### 3. Créer la base de données
-
-```bash
-# Se connecter à PostgreSQL
-psql -U postgres
-
-# Créer la base de données
-CREATE DATABASE saas_db;
-
-# Quitter
-\q
-```
-
-**OU** utiliser le script SQL fourni :
-
-```bash
-psql -U postgres -f create_database.sql
-```
-
-### 4. Installer les dépendances Maven
-
-```bash
-./mvnw clean install
-```
-
-## 🔧 Configuration
-
-### Configuration PostgreSQL
-
-Modifier le fichier `src/main/resources/application.properties` si nécessaire :
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/saas_db
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-```
-
-### Configuration des profils
-
-Le projet supporte plusieurs profils Spring :
-
-- **default** : Configuration de base
-- **dev** : Profil de développement (logs détaillés, base de données de test)
-- **prod** : Profil de production (logs minimaux, sécurité renforcée)
-
-Pour activer un profil :
-
-```bash
-# Via Maven
+# 4. Build et lancement
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Via variable d'environnement
-export SPRING_PROFILES_ACTIVE=dev
-./mvnw spring-boot:run
+# 5. Vérifier que l'API répond
+curl http://localhost:8080/api/health
 
-# Via argument JVM
-java -jar target/saas-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
+# 6. Swagger UI
+open http://localhost:8080/swagger-ui.html
 ```
 
-## 🚀 Démarrage
+> **Docker doit être démarré** avant de lancer l'application.  
+> La base de données est automatiquement créée au démarrage.
 
-### Démarrer l'application
-
-```bash
-# Via Maven wrapper
-./mvnw spring-boot:run
-
-# Ou avec un profil spécifique
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-### Vérifier que l'application fonctionne
-
-Une fois démarrée, l'application est accessible sur http://localhost:8080
-
-**Endpoints de test :**
-
-- Page d'accueil : http://localhost:8080/api/
-- Health check : http://localhost:8080/api/health
-- Swagger UI : http://localhost:8080/swagger-ui.html
-- API Docs : http://localhost:8080/api-docs
-
-## 📚 Documentation API
-
-### Swagger UI
-
-L'interface Swagger UI est disponible à l'adresse :
-
-**http://localhost:8080/swagger-ui.html**
-
-Elle fournit une documentation interactive de tous les endpoints de l'API avec la possibilité de tester directement les requêtes.
-
-### API Documentation (OpenAPI JSON)
-
-La spécification OpenAPI complète est disponible à :
-
-**http://localhost:8080/api-docs**
-
-### Endpoints disponibles
-
-#### Health & Info
-- `GET /api/` - Page d'accueil de l'API
-- `GET /api/health` - Health check
-
-#### Contacts
-- `GET /api/contacts` - Récupérer tous les contacts
-- `GET /api/contacts/{id}` - Récupérer un contact par ID
-- `POST /api/contacts` - Créer un nouveau contact
-- `PUT /api/contacts/{id}` - Mettre à jour un contact
-- `DELETE /api/contacts/{id}` - Supprimer un contact
-
-### Exemple de requête avec curl
-
-```bash
-# Récupérer tous les contacts
-curl http://localhost:8080/api/contacts
-
-# Créer un nouveau contact
-curl -X POST http://localhost:8080/api/contacts \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nom": "Dupont",
-    "prenom": "Jean",
-    "email": "jean.dupont@example.com",
-    "telephone": "+33612345678",
-    "entreprise": "Tech Corp",
-    "poste": "Directeur Marketing"
-  }'
-```
+---
 
 ## 📁 Structure du projet
 
 ```
-saas/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── tg/univlome/saas/
-│   │   │       ├── SaasApplication.java
-│   │   │       ├── config/
-│   │   │       │   ├── OpenApiConfig.java
-│   │   │       │   └── HealthController.java
-│   │   │       └── marketing/
-│   │   │           ├── analytique/
-│   │   │           ├── authentification/
-│   │   │           ├── campagne/
-│   │   │           ├── contact/
-│   │   │           │   ├── application/
-│   │   │           │   │   ├── controllers/
-│   │   │           │   │   ├── dtos/
-│   │   │           │   │   └── mappers/
-│   │   │           │   ├── domain/
-│   │   │           │   │   ├── enums/
-│   │   │           │   │   ├── models/
-│   │   │           │   │   └── services/
-│   │   │           │   └── repositories/
-│   │   │           ├── email/
-│   │   │           ├── reseaux_sociaux/
-│   │   │           └── shared/
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       ├── application-dev.properties
-│   │       └── application-prod.properties
-│   └── test/
-├── pom.xml
-├── README.md
-├── CONFIG_README.md
-├── SUMMARY.md
-├── NEXT_STEPS.md
-└── create_database.sql
+src/main/java/tg/univlome/saas/
+├── config/                    # Configuration globale (Security, Swagger, Async)
+├── marketing/
+│   ├── authentification/      # JWT, gestion utilisateurs — OWNER: Senior
+│   ├── contact/               # Gestion des contacts — OWNER: Senior
+│   │   ├── application/
+│   │   │   ├── controllers/
+│   │   │   ├── dtos/
+│   │   │   └── mappers/
+│   │   ├── domain/
+│   │   │   ├── models/
+│   │   │   ├── services/
+│   │   │   └── enums/
+│   │   └── repositories/
+│   ├── campagne/              # Gestion des campagnes marketing — OWNER: Senior
+│   ├── email/                 # Envoi et gestion des emails — OWNER: Junior
+│   ├── reseaux_sociaux/       # Intégration réseaux sociaux — OWNER: Junior
+│   ├── analytique/            # Tableaux de bord et statistiques — OWNER: Junior
+│   └── shared/                # Composants partagés — OWNER: Senior
+│       ├── exception/         # GlobalExceptionHandler + hiérarchie exceptions
+│       ├── response/          # ApiResponse<T>
+│       └── util/              # Classes utilitaires sans état
+└── SaasApplication.java
 ```
+
+---
 
 ## 📖 Modules
 
-Le projet est organisé en modules suivant l'architecture Spring Modulith :
+Le projet est organisé en modules suivant l'architecture **Spring Modulith** :
 
-- **analytique** : Analyse des données et statistiques
-- **authentification** : Gestion de l'authentification et des utilisateurs
-- **campagne** : Gestion des campagnes marketing
-- **contact** : Gestion des contacts
-- **email** : Gestion des emails
-- **reseaux_sociaux** : Intégration des réseaux sociaux
-- **shared** : Composants partagés
+| Module | Description | Responsable |
+|--------|-------------|-------------|
+| `authentification` | JWT, authentification, gestion des utilisateurs | Senior |
+| `contact` | CRUD contacts, import, segmentation | Senior |
+| `campagne` | Création et planification des campagnes | Senior |
+| `email` | Envoi d'emails, templates, tracking | Junior |
+| `reseaux_sociaux` | Intégration Facebook, Instagram, Twitter | Junior |
+| `analytique` | Statistiques, taux d'ouverture, rapports | Junior |
+| `shared` | Exceptions, réponses API, utilitaires communs | Senior |
+
+---
+
+## 📝 Conventions — lire absolument
+
+> Voir **[CONTRIBUTING.md](./CONTRIBUTING.md)** pour le détail complet.
+
+**Résumé rapide :**
+- Une feature = une branche = une issue GitHub
+- Nommage branche : `feature/module-description` ou `fix/module-description`
+- Commits : format Conventional Commits (`feat(module):`, `fix(module):`, `test:`, `docs:`, `chore:`)
+- Toute PR doit passer le CI avant d'être mergée
+- Code review obligatoire : 1 reviewer minimum (Senior review les PRs critiques)
+- Jamais de push direct sur `main` ou `develop`
+
+---
+
+## 🌿 Workflow Git
+
+```
+main          ← production uniquement, protégée
+develop       ← branche d'intégration principale
+feature/*     ← nouvelles fonctionnalités
+fix/*         ← corrections de bugs
+test/*        ← ajout de tests uniquement
+docs/*        ← documentation uniquement
+chore/*       ← maintenance technique
+```
+
+**Cycle de travail quotidien :**
+
+```bash
+# 1. Toujours partir de develop à jour
+git checkout develop
+git pull origin develop
+
+# 2. Créer ta branche depuis develop
+git checkout -b feature/contact-import-csv
+
+# 3. Coder, committer régulièrement
+git add .
+git commit -m "feat(contact): add CSV import with validation"
+
+# 4. Pousser ta branche
+git push origin feature/contact-import-csv
+
+# 5. Ouvrir une Pull Request sur GitHub vers develop
+```
+
+---
+
+## 🔀 Pull Requests
+
+- **Titre** : `[MODULE] Description courte` → ex: `[CONTACT] Add CSV import`
+- **Template** : remplir le template automatique (voir `.github/pull_request_template.md`)
+- **Lier l'issue** : mentionner `Closes #42` dans la description
+- **Taille** : max 400 lignes de diff — découper si plus grand
+- **Tests** : toute PR doit inclure ses tests unitaires
+- **Reviewer** : assigner le Senior pour les modules `authentification`, `shared`
+
+---
+
+## 🔄 CI / CD
+
+À chaque Pull Request vers `develop` ou `main` :
+
+1. **Build** : `mvn clean compile`
+2. **Tests** : `mvn test` (JUnit 5 + Mockito)
+3. **Coverage** : JaCoCo — minimum 70% sur les services
+
+> La PR ne peut pas être mergée si le CI est rouge.
+
+---
+
+## 🔧 Variables d'environnement
+
+Copier `.env.example` → `.env` (**ne jamais committer `.env`**).
+
+| Variable | Description |
+|----------|-------------|
+| `DB_URL` | URL JDBC PostgreSQL (`jdbc:postgresql://localhost:5432/saas_db`) |
+| `DB_USERNAME` | Utilisateur base de données |
+| `DB_PASSWORD` | Mot de passe base de données |
+| `JWT_SECRET` | Clé secrète JWT (min 256 bits) |
+| `JWT_ACCESS_EXPIRATION` | Durée access token en ms (défaut: 900000 = 15min) |
+| `JWT_REFRESH_EXPIRATION` | Durée refresh token en ms (défaut: 604800000 = 7j) |
+| `MAIL_HOST` | Serveur SMTP (ex: smtp.gmail.com) |
+| `MAIL_PORT` | Port SMTP (ex: 587) |
+| `MAIL_USERNAME` | Email transactionnel |
+| `MAIL_PASSWORD` | Mot de passe SMTP |
+| `SMS_API_KEY` | Clé API SMS (à intégrer) |
+| `SOCIAL_API_KEY` | Clé API réseaux sociaux (à intégrer) |
+
+---
+
+## 📚 Documentation API
+
+### Swagger UI
+Interface interactive disponible après démarrage :
+
+**http://localhost:8080/swagger-ui.html**
+
+### OpenAPI JSON
+
+**http://localhost:8080/api-docs**
+
+### Endpoints principaux
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/health` | Health check |
+| `POST` | `/api/v1/auth/login` | Authentification |
+| `POST` | `/api/v1/auth/refresh` | Renouveler le token |
+| `GET` | `/api/v1/contacts` | Liste des contacts |
+| `POST` | `/api/v1/contacts` | Créer un contact |
+| `GET` | `/api/v1/campagnes` | Liste des campagnes |
+| `POST` | `/api/v1/campagnes` | Créer une campagne |
+| `POST` | `/api/v1/campagnes/{id}/envoyer` | Envoyer une campagne |
+| `GET` | `/api/v1/analytique/dashboard` | Tableau de bord |
+
+---
+
+## 🤝 Contact & ownership des modules
+
+| Module | Responsable | Rôle |
+|--------|-------------|------|
+| `authentification`, `contact`, `campagne`, `shared` | À définir | Senior |
+| `email`, `reseaux_sociaux`, `analytique` | À définir | Junior |
+
+> En cas de doute sur un module, ouvrir une issue avec le label `question` et tagger le owner.
+
+---
 
 ## 🔨 Commandes utiles
-
-### Maven
 
 ```bash
 # Nettoyer et compiler
@@ -266,56 +251,18 @@ Le projet est organisé en modules suivant l'architecture Spring Modulith :
 # Construire le projet (sans tests)
 ./mvnw clean install -DskipTests
 
-# Démarrer l'application
-./mvnw spring-boot:run
+# Démarrer l'application (profil dev)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Construire un JAR exécutable
 ./mvnw clean package
+
+# Démarrer/arrêter Docker
+docker-compose up -d
+docker-compose down
 ```
 
-### PostgreSQL
-
-```bash
-# Se connecter à PostgreSQL
-psql -U postgres
-
-# Lister les bases de données
-\l
-
-# Se connecter à la base saas_db
-\c saas_db
-
-# Lister les tables
-\dt
-
-# Quitter psql
-\q
-```
-
-## 📝 Documentation complémentaire
-
-- **CONFIG_README.md** : Guide détaillé de configuration PostgreSQL et Swagger
-- **SUMMARY.md** : Résumé de la configuration effectuée
-- **NEXT_STEPS.md** : Prochaines étapes après l'installation
-- **create_database.sql** : Script SQL de création de la base de données
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
-
-## 📄 Licence
-
-Ce projet est développé dans le cadre d'un projet universitaire à l'Université de Lomé (Togo).
-
-## 📧 Contact
-
-Pour toute question ou suggestion, contactez l'équipe de développement.
 
 ---
 
-Développé avec ❤️ par l'équipe SaaS Marketing Platform
-
+*Développé  par l'équipe SaaS Marketing Platform — SaaS-Teams*
