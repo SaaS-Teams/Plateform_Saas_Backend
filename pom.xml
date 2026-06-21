@@ -219,6 +219,24 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
+				<configuration>
+					<rules>
+						<rule>
+							<element>PACKAGE</element>
+							<includes>
+								<include>tg/univlome/saas/marketing/*/domain/services/**</include>
+								<include>tg/univlome/saas/shared/exceptions/**</include>
+							</includes>
+							<limits>
+								<limit>
+									<counter>LINE</counter>
+									<value>COVEREDRATIO</value>
+									<minimum>0.80</minimum>
+								</limit>
+							</limits>
+						</rule>
+					</rules>
+				</configuration>
 				<executions>
 					<!-- Prépare l'agent JaCoCo avant les tests -->
 					<execution>
@@ -241,24 +259,6 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
-						<configuration>
-							<rules>
-								<rule>
-									<element>PACKAGE</element>
-									<!-- Vérifier uniquement les services -->
-									<includes>
-										<include>tg/univlome/saas/marketing/*/domain/services/**</include>
-									</includes>
-									<limits>
-										<limit>
-											<counter>LINE</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.80</minimum>
-										</limit>
-									</limits>
-								</rule>
-							</rules>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
