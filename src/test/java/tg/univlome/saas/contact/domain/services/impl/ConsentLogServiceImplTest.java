@@ -30,8 +30,10 @@ class ConsentLogServiceImplTest {
 
     @Mock
     private ConsentLogRepository consentLogRepository;
-    @Mock private ContactRepository contactRepository;
-    @Mock private ConsentLogMapper consentLogMapper;
+    @Mock
+    private ContactRepository contactRepository;
+    @Mock
+    private ConsentLogMapper consentLogMapper;
 
     @InjectMocks
     private ConsentLogServiceImpl consentLogService;

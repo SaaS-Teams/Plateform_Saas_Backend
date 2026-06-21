@@ -20,24 +20,28 @@ import tg.univlome.saas.marketing.contact.repositories.ContactRepository;
 import tg.univlome.saas.marketing.contact.repositories.ContactSegmentRepository;
 import tg.univlome.saas.marketing.contact.repositories.SegmentRepository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 @ExtendWith(MockitoExtension.class)
 class SegmentServiceImplTest {
 
-    @Mock private SegmentRepository segmentRepository;
-    @Mock private ContactRepository contactRepository;
-    @Mock private ContactSegmentRepository contactSegmentRepository;
-    @Mock private SegmentMapper segmentMapper;
-    @Mock private ContactMapper contactMapper;
+    @Mock
+    private SegmentRepository segmentRepository;
+    @Mock
+    private ContactRepository contactRepository;
+    @Mock
+    private ContactSegmentRepository contactSegmentRepository;
+    @Mock
+    private SegmentMapper segmentMapper;
+    @Mock
+    private ContactMapper contactMapper;
 
     @InjectMocks
     private SegmentServiceImpl segmentService;
