@@ -39,7 +39,23 @@ git clone <url-du-repo>
 cd saas
 ```
 
-### 2. Installer PostgreSQL
+### 2. Démarrer l'infrastructure locale (Docker)
+
+Il est fortement recommandé d'utiliser Docker pour lancer PostgreSQL, Redis et MailHog localement.
+
+```bash
+# Copier le fichier d'environnement
+cp .env.example .env
+
+# Démarrer les services en arrière-plan
+docker compose --profile dev up -d
+
+# Vérifier que tout tourne
+docker compose ps
+```
+
+<details>
+<summary>Alternative : Installer PostgreSQL manuellement</summary>
 
 ```bash
 # Ubuntu/Debian
@@ -50,6 +66,7 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 ```
+</details>
 
 ### 3. Créer la base de données
 

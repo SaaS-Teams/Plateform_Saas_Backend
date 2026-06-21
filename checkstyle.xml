@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtds/configuration_1_3.dtd">
+
+<!--
+    Configuration Checkstyle — SaaS Marketing Platform
+    Règles raisonnables : qualité sans bloquer le développement.
+    Adapté pour Java 21 + Spring Boot + Lombok + MapStruct.
+-->
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java, properties, xml"/>
+
+    <!-- Pas de tabulations — espaces uniquement -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+
+    <!-- Fichier doit se terminer par une nouvelle ligne -->
+    <module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf_cr_crlf"/>
+    </module>
+
+    <!-- Longueur de ligne max 140 caractères -->
+    <module name="LineLength">
+        <property name="max" value="140"/>
+        <property name="ignorePattern"
+                  value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
+
+    <module name="TreeWalker">
+
+        <!-- ── Imports ─────────────────────────────────────────────── -->
+        <module name="UnusedImports"/>
+        <module name="RedundantImport"/>
+        <module name="AvoidStarImport">
+            <!-- Autorisé uniquement pour JPA et Lombok -->
+            <property name="excludes" value="jakarta.persistence,lombok"/>
+        </module>
+        <!-- Ordre des imports : static d'abord, puis packages -->
+        <module name="ImportOrder">
+            <property name="option" value="top"/>
+            <property name="separatedStaticGroups" value="true"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+        </module>
+
+        <!-- ── Nommage ──────────────────────────────────────────────── -->
+        <!-- Constantes : UPPER_SNAKE_CASE -->
+        <module name="ConstantName"/>
+        <!-- Variables locales : camelCase -->
+        <module name="LocalVariableName"/>
+        <!-- Méthodes : camelCase -->
+        <module name="MethodName"/>
+        <!-- Packages : minuscules -->
+        <module name="PackageName">
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+        </module>
+        <!-- Paramètres : camelCase -->
+        <module name="ParameterName"/>
+        <!-- Classes/Interfaces : PascalCase -->
+        <module name="TypeName"/>
+        <!-- Membres d'instance : camelCase -->
+        <module name="MemberName"/>
+        <!-- Variables statiques : camelCase -->
+        <module name="StaticVariableName"/>
+
+        <!-- ── Espaces et accolades ─────────────────────────────────── -->
+        <module name="LeftCurly"/>
+        <module name="RightCurly"/>
+        <!-- Accolades obligatoires même pour bloc d'une ligne -->
+        <module name="NeedBraces"/>
+        <module name="WhitespaceAfter"/>
+        <module name="MethodParamPad"/>
+        <!-- Pas d'espace avant les parenthèses -->
+        <module name="NoWhitespaceBefore"/>
+        <!-- Opérateurs en fin de ligne (pas en début) -->
+        <module name="OperatorWrap"/>
+
+        <!-- ── Bonnes pratiques Java ────────────────────────────────── -->
+        <!-- Pas de statement vide -->
+        <module name="EmptyStatement"/>
+        <!-- equals() et hashCode() doivent être définis ensemble -->
+        <module name="EqualsHashCode"/>
+        <!-- Simplifier les expressions booléennes -->
+        <module name="SimplifyBooleanExpression"/>
+        <!-- Simplifier les retours booléens -->
+        <module name="SimplifyBooleanReturn"/>
+        <!-- Utiliser L majuscule pour les long literals (1000L pas 1000l) -->
+        <module name="UpperEll"/>
+        <!-- Pas de System.out.println — utiliser SLF4J -->
+        <module name="Regexp">
+            <property name="format" value="System\.(out|err)\.print"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message"
+                      value="Interdit : utiliser SLF4J (log.info/warn/error) à la place de System.out/err"/>
+        </module>
+        <!-- Pas de e.printStackTrace() -->
+        <module name="Regexp">
+            <property name="format" value="\.printStackTrace\(\)"/>
+            <property name="illegalPattern" value="true"/>
+            <property name="message"
+                      value="Interdit : utiliser log.error(message, exception) à la place de printStackTrace()"/>
+        </module>
+        <!-- Pas de TODO sans ticket -->
+        <module name="TodoComment">
+            <property name="format" value="TODO(?! #\d+)"/>
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- ── Complexité ────────────────────────────────────────────── -->
+        <!-- Complexité cyclomatique max par méthode -->
+        <module name="CyclomaticComplexity">
+            <property name="max" value="10"/>
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- Nombre de paramètres max par méthode -->
+        <module name="ParameterNumber">
+            <property name="max" value="7"/>
+        </module>
+        <!-- Longueur max d'une méthode -->
+        <module name="MethodLength">
+            <property name="max" value="60"/>
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- ── Modificateurs ────────────────────────────────────────── -->
+        <!-- Ordre des modificateurs : public static final ... -->
+        <module name="ModifierOrder"/>
+        <!-- Pas de modificateurs redondants dans les interfaces -->
+        <module name="RedundantModifier"/>
+
+        <!-- ── Blocs ─────────────────────────────────────────────────── -->
+        <!-- Pas de catch vide -->
+        <module name="EmptyCatchBlock">
+            <property name="exceptionVariableName" value="ignored|expected"/>
+        </module>
+
+        <!-- ── Annotations ──────────────────────────────────────────── -->
+        <!-- @Override obligatoire quand on override une méthode -->
+        <module name="MissingOverride"/>
+
+        <!-- ── Indentation & Nombres magiques ───────────────────────── -->
+        <!-- Force l'indentation à 4 espaces -->
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="throwsIndent" value="8"/>
+            <property name="arrayInitIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="8"/>
+        </module>
+
+        <!-- Chasse aux nombres codés en dur (Magic Numbers) -->
+        <module name="MagicNumber">
+            <property name="ignoreNumbers" value="-1, 0, 1, 2"/>
+            <property name="severity" value="warning"/>
+        </module>
+
+    </module>
+
+</module>
