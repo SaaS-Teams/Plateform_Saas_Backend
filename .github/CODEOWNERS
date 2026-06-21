@@ -1,0 +1,12 @@
+# Owners globaux — fallback sur tout le repo
+*  @Rich-123-source
+
+# Code métier backend
+#src/main/java/tg/univlome/saas/marketing/  @Rich-123-source
+
+# Configuration & infrastructure
+src/main/resources/  @Rich-123-source
+pom.xml              @Rich-123-source
+
+# CI/CD
+.github/workflows/   @Rich-123-source
