@@ -1,9 +1,10 @@
-package tg.univlome.saas.marketing.contact.application.mappers;
+package tg.univlome.saas.contact.application.mappers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tg.univlome.saas.marketing.contact.application.dtos.request.ContactRequest;
 import tg.univlome.saas.marketing.contact.application.dtos.response.ContactResponse;
+import tg.univlome.saas.marketing.contact.application.mappers.ContactMapper;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentStatus;
 import tg.univlome.saas.marketing.contact.domain.models.Contact;
 
@@ -47,7 +48,7 @@ class ContactMapperTest {
         assertEquals("Lomé", response.city());
 
         // VÉRIFICATION CORRIGÉE : On compare le fauxTrackingId avec l'ID de la réponse
-        assertEquals(fauxTrackingId, contact.getId());
+        assertEquals(fauxTrackingId, contact.getTrackingId());
     }
 
     @Test
