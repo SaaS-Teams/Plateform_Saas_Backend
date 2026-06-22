@@ -64,7 +64,7 @@ class ConsentLogServiceImplTest {
         ConsentLog log = new ConsentLog(new Contact(), ConsentAction.GRANTED, "ip");
         Page<ConsentLog> mockPage = new PageImpl<>(List.of(log));
 
-        when(consentLogRepository.findByContact_TrackingId(contactId, pageRequest)).thenReturn(mockPage);
+        when(consentLogRepository.findByContactTrackingId(contactId, pageRequest)).thenReturn(mockPage);
         when(consentLogMapper.toResponse(log)).thenReturn(new ConsentLogResponse(contactId, UUID.randomUUID(), ConsentAction.GRANTED, "ip", null));
 
         // --- ACT ---
@@ -89,6 +89,6 @@ class ConsentLogServiceImplTest {
         });
 
         // On vérifie qu'il n'a pas essayé de chercher les logs d'un contact inexistant
-        verify(consentLogRepository, never()).findByContact_TrackingId(any(), any());
+        verify(consentLogRepository, never()).findByContactTrackingId(any(), any());
     }
 }

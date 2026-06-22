@@ -1,19 +1,25 @@
-package tg.univlome.saas.marketing.contact.domain.services.impl;
+package tg.univlome.saas.contact.domain.services.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 import tg.univlome.saas.marketing.contact.application.dtos.request.ContactRequest;
 import tg.univlome.saas.marketing.contact.application.dtos.response.ContactResponse;
+import tg.univlome.saas.marketing.contact.application.dtos.response.ImportResult;
 import tg.univlome.saas.marketing.contact.application.mappers.ContactMapper;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentAction;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentStatus;
 import tg.univlome.saas.marketing.contact.domain.models.Contact;
 import tg.univlome.saas.marketing.contact.domain.services.ConsentLogService;
+import tg.univlome.saas.marketing.contact.domain.services.impl.ContactServiceImpl;
 import tg.univlome.saas.marketing.contact.repositories.ContactRepository;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -123,5 +129,35 @@ class ContactServiceImplTest {
 
         // On vérifie que l'action GRANTED a bien été loggée pour la CNIL
         verify(consentLogService, times(1)).recordLog(existingContact, ConsentAction.GRANTED, "127.0.0.1");
+    }
+    @Test
+    void shouldImportContactsFromCsv() throws Exception {
+        // --- 1. ARRANGE ---
+        // On crée un faux contenu CSV avec 3 lignes de données (+ 1 ligne d'en-tête)
+        String csvContent = "email,firstName,lastName,city,country\n"
+                + "nouveau@titan.com,Jude,Worou,Lomé,Togo\n"
+                + "existant@titan.com,Richard,Doe,Paris,France\n"
+                + "\n"; // Ligne vide pour simuler une erreur
+
+        MultipartFile mockFile = mock(MultipartFile.class);
+        InputStream inputStream = new ByteArrayInputStream(csvContent.getBytes(StandardCharsets.UTF_8));
+        when(mockFile.getInputStream()).thenReturn(inputStream);
+
+        // On simule le comportement de la base de données
+        when(contactRepository.existsByEmail("nouveau@titan.com")).thenReturn(false);
+        when(contactRepository.existsByEmail("existant@titan.com")).thenReturn(true);
+
+        // --- 2. ACT ---
+        ImportResult result = contactService.importContactsFromCsv(mockFile);
+
+        // --- 3. ASSERT ---
+        assertNotNull(result);
+        assertEquals(3, result.total(), "Le CSV contient 3 lignes de données");
+        assertEquals(1, result.imported(), "1 seul contact devrait être importé");
+        assertEquals(1, result.ignored(), "1 contact devrait être ignoré (doublon)");
+        assertEquals(1, result.errors(), "1 ligne vide devrait générer une erreur");
+
+        // On vérifie que la méthode save() n'a été appelée qu'une seule fois
+        verify(contactRepository, times(1)).save(any(Contact.class));
     }
 }

@@ -3,8 +3,10 @@ package tg.univlome.saas.marketing.contact.domain.services;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 import tg.univlome.saas.marketing.contact.application.dtos.request.ContactRequest;
 import tg.univlome.saas.marketing.contact.application.dtos.response.ContactResponse;
+import tg.univlome.saas.marketing.contact.application.dtos.response.ImportResult;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentStatus;
 
 public interface ContactService {
@@ -17,4 +19,6 @@ public interface ContactService {
     Page<ContactResponse> getAllContacts(Pageable pageable);
 
     ContactResponse changeConsentStatus(UUID trackingId, ConsentStatus newStatus, String ipAddress);
+
+    ImportResult importContactsFromCsv(MultipartFile file);
 }

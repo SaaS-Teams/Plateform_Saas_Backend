@@ -17,4 +17,6 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     Page<Contact> findByConsentStatus(ConsentStatus status, Pageable pageable);
 
     void deleteByTrackingId(UUID trackingId);
+
+    boolean existsByEmail(String email);
 }

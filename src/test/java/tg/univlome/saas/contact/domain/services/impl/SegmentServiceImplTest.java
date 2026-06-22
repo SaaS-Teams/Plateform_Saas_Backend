@@ -1,4 +1,4 @@
-package tg.univlome.saas.marketing.contact.domain.services.impl;
+package tg.univlome.saas.contact.domain.services.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +19,7 @@ import tg.univlome.saas.marketing.contact.domain.models.Segment;
 import tg.univlome.saas.marketing.contact.repositories.ContactRepository;
 import tg.univlome.saas.marketing.contact.repositories.ContactSegmentRepository;
 import tg.univlome.saas.marketing.contact.repositories.SegmentRepository;
+import tg.univlome.saas.marketing.contact.domain.services.impl.SegmentServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +79,7 @@ class SegmentServiceImplTest {
         Segment mockSegment = new Segment();
 
         // 1. On simule que la liaison n'existe pas encore
-        when(contactSegmentRepository.existsByContact_TrackingIdAndSegment_TrackingId(contactId, segmentId)).thenReturn(false);
+        when(contactSegmentRepository.existsByContactTrackingIdAndSegmentTrackingId(contactId, segmentId)).thenReturn(false);
         // 2. On simule qu'on trouve bien le contact et le segment en base
         when(contactRepository.findByTrackingId(contactId)).thenReturn(Optional.of(mockContact));
         when(segmentRepository.findByTrackingId(segmentId)).thenReturn(Optional.of(mockSegment));
@@ -105,7 +106,7 @@ class SegmentServiceImplTest {
         ContactSegment liaison = new ContactSegment(mockContact, new Segment());
         Page<ContactSegment> mockPage = new PageImpl<>(List.of(liaison)); // PageImpl crée une fausse "Page"
 
-        when(contactSegmentRepository.findBySegment_TrackingId(segmentId, pageRequest)).thenReturn(mockPage);
+        when(contactSegmentRepository.findBySegmentTrackingId(segmentId, pageRequest)).thenReturn(mockPage);
         when(contactMapper.toResponse(mockContact)).thenReturn(new ContactResponse(null, "mail", null, null, null, null, null, null));
 
         // --- ACT ---

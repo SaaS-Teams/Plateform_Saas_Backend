@@ -24,8 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import tg.univlome.saas.marketing.contact.application.dtos.request.ContactRequest;
 import tg.univlome.saas.marketing.contact.application.dtos.response.ContactResponse;
+import tg.univlome.saas.marketing.contact.application.dtos.response.ImportResult;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentStatus;
 import tg.univlome.saas.marketing.contact.domain.services.ContactService;
 
@@ -112,5 +114,19 @@ public class ContactController {
         String ipAddress = httpRequest.getRemoteAddr();
         ContactResponse response = contactService.changeConsentStatus(trackingId, status, ipAddress);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/import", consumes = "multipart/form-data")
+    @Operation(summary = "Importer des contacts via CSV",
+            description = "Importe une liste de contacts à partir d'un fichier CSV. "
+                    + "Les adresses email en doublon sont automatiquement ignorées.")
+    public ResponseEntity<ImportResult> importContacts(@RequestParam("file") MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        ImportResult result = contactService.importContactsFromCsv(file);
+        return ResponseEntity.ok(result);
     }
 }
