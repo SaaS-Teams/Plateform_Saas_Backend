@@ -23,10 +23,10 @@ public class EmailController {
     @PostMapping("/send")
     @Operation(
             summary = "Envoyer un email",
-            description = "Envoie un email via SendGrid, gère les tentatives en cas d'échec, et logue le résultat en base de données."
+            description = "Prend en charge la demande d'envoi. Retourne un statut 202 (Accepted). "
+                    + "Le traitement réel inclut un mécanisme de retry automatique en tâche de fond en cas d'instabilité réseau."
     )
     public ResponseEntity<String> sendEmail(@Valid @RequestBody EmailMessage request) {
-
         emailService.sendEmail(request);
         return ResponseEntity.accepted().body("L'email a été pris en charge et est en cours d'envoi.");
     }

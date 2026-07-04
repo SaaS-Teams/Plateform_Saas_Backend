@@ -34,6 +34,9 @@ public class EmailLog {
     private String errorMessage;
 
     @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(nullable = true)
     private LocalDateTime sentAt;
 
     // Constructeur par défaut obligatoire pour JPA
@@ -41,3 +44,4 @@ public class EmailLog {
     }
 
 }
+
