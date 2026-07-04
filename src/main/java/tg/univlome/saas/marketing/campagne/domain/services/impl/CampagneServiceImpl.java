@@ -1,5 +1,8 @@
-package tg.univlome.saas.marketing.campagne.domain.services.Impl;
+package tg.univlome.saas.marketing.campagne.domain.services.impl;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,10 +13,6 @@ import tg.univlome.saas.marketing.campagne.application.mappers.CampagneMapper;
 import tg.univlome.saas.marketing.campagne.domain.models.Campagne;
 import tg.univlome.saas.marketing.campagne.domain.services.CampagneService;
 import tg.univlome.saas.marketing.campagne.repositories.CampagneRepository;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,7 +62,7 @@ public class CampagneServiceImpl implements CampagneService {
         log.info("Mise à jour de la campagne avec l'ID : {}", trackingId);
 
         Campagne campagne = campagneRepository.findByTrackingId(trackingId)
-                .orElseThrow(() -> new RuntimeException("Campagne introuvable avec l'ID : " + id));
+                .orElseThrow(() -> new RuntimeException("Campagne introuvable avec l'ID : " + trackingId));
 
         // On met à jour l'entité existante grâce à notre mapper
         campagneMapper.updateEntityFromRequest(campagne, request);

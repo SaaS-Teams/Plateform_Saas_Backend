@@ -2,9 +2,7 @@ package tg.univlome.saas.marketing.campagne.application.dtos.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 import tg.univlome.saas.marketing.campagne.domain.enums.CampagneStatus;
-
 
 public record CampagneResponse(
         Long id,

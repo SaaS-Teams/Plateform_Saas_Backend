@@ -1,12 +1,11 @@
 package tg.univlome.saas.marketing.campagne.repositories;
 
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import tg.univlome.saas.marketing.campagne.domain.enums.CampagneStatus;
 import tg.univlome.saas.marketing.campagne.domain.models.Campagne;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 public interface CampagneRepository extends JpaRepository<Campagne, Long> {

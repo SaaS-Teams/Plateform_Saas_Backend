@@ -1,13 +1,12 @@
 package tg.univlome.saas.marketing.campagne.domain.models;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tg.univlome.saas.marketing.campagne.domain.enums.CampagneStatus;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "campagnes")

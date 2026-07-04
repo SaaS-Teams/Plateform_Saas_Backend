@@ -6,21 +6,31 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import tg.univlome.saas.marketing.campagne.application.dtos.request.CampagneRequest;
 import tg.univlome.saas.marketing.campagne.application.dtos.response.CampagneResponse;
 import tg.univlome.saas.marketing.campagne.domain.services.CampagneService;
 
-import java.util.List;
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/campagnes")
 @RequiredArgsConstructor
-@Tag(name = "Campagnes", description = "Endpoints pour la gestion du cycle de vie des campagnes marketing. L'accès aux ressources est sécurisé exclusivement via le Tracking ID (UUID).")
+@Tag(
+        name = "Campagnes",
+        description = "Endpoints pour la gestion du cycle de vie des campagnes marketing. "
+                + "L'accès aux ressources est sécurisé exclusivement via le Tracking ID (UUID)."
+)
 public class CampagneController {
 
     private final CampagneService campagneService;
@@ -28,7 +38,8 @@ public class CampagneController {
     @PostMapping
     @Operation(
             summary = "Créer une nouvelle campagne",
-            description = "Enregistre une nouvelle campagne en base de données. Le statut initial sera défini automatiquement sur BROUILLON."
+            description = "Enregistre une nouvelle campagne en base de données. "
+                    + "Le statut initial sera défini automatiquement sur BROUILLON."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "La campagne a été créée avec succès"),
@@ -52,7 +63,8 @@ public class CampagneController {
     @GetMapping("/{trackingId}")
     @Operation(
             summary = "Obtenir les détails d'une campagne",
-            description = "Récupère les informations complètes d'une campagne spécifique en utilisant son identifiant de suivi unique (UUID)."
+            description = "Récupère les informations complètes d'une campagne "
+                    + "spécifique en utilisant son identifiant de suivi unique (UUID)."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Campagne trouvée et retournée avec succès"),
@@ -68,7 +80,9 @@ public class CampagneController {
     @PutMapping("/{trackingId}")
     @Operation(
             summary = "Modifier une campagne existante",
-            description = "Met à jour les informations d'une campagne (nom, sujet, contenu, date de planification). Seules les campagnes n'ayant pas encore été envoyées devraient être modifiées."
+            description = "Met à jour les informations d'une campagne (nom, sujet, contenu, "
+                    + "date de planification). Seules les campagnes n'ayant pas encore "
+                    + "été envoyées devraient être modifiées."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "La campagne a été mise à jour avec succès"),

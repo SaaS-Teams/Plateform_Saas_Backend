@@ -30,7 +30,7 @@ import tg.univlome.saas.marketing.contact.repositories.ContactRepository;
 @RequiredArgsConstructor
 public class ContactServiceImpl implements ContactService {
 
-    private static final Logger log = LoggerFactory.getLogger(ContactServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ContactServiceImpl.class);
 
     private final ContactRepository contactRepository;
     private final ContactMapper contactMapper;
@@ -49,7 +49,7 @@ public class ContactServiceImpl implements ContactService {
     public ContactResponse createContact(ContactRequest request, String ipAddress) {
         // 1. Règle métier : Déduplication
         if (contactRepository.findByEmail(request.email()).isPresent()) {
-            log.warn("Tentative de création d'un contact avec un email existant : {}", request.email());
+            LOG.warn("Tentative de création d'un contact avec un email existant : {}", request.email());
             throw new IllegalArgumentException("Un contact avec cet email existe déjà.");
         }
 
@@ -59,7 +59,7 @@ public class ContactServiceImpl implements ContactService {
 
         // 3. Log RGPD automatique (Initialisé en PENDING par défaut dans l'entité)
         consentLogService.recordLog(contact, ConsentAction.GRANTED, ipAddress);
-        log.info("Contact créé avec succès : id={}, email={}", contact.getId(), contact.getEmail());
+        LOG.info("Contact créé avec succès : id={}, email={}", contact.getId(), contact.getEmail());
 
         return contactMapper.toResponse(contact);
     }
@@ -77,19 +77,19 @@ public class ContactServiceImpl implements ContactService {
     public ContactResponse updateContact(UUID trackingId, ContactRequest request) {
         Contact contact = contactRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> {
-                    log.error("Tentative de mise à jour d'un contact introuvable : {}", trackingId);
+                    LOG.error("Tentative de mise à jour d'un contact introuvable : {}", trackingId);
                     return new IllegalArgumentException("Contact introuvable");
                 });
 
         // On empêche la modification de l'email si un autre compte l'utilise déjà
         if (!contact.getEmail().equals(request.email()) && contactRepository.findByEmail(request.email()).isPresent()) {
-            log.warn("Tentative d'utilisation d'un email déjà pris : {}", request.email());
+            LOG.warn("Tentative d'utilisation d'un email déjà pris : {}", request.email());
             throw new IllegalArgumentException("Cet email est déjà pris par un autre contact.");
         }
 
         contactMapper.updateEntityFromRequest(request, contact);
         contact = contactRepository.save(contact);
-        log.info("Contact mis à jour avec succès : trackingId={}", trackingId);
+        LOG.info("Contact mis à jour avec succès : trackingId={}", trackingId);
 
         return contactMapper.toResponse(contact);
     }
@@ -106,7 +106,7 @@ public class ContactServiceImpl implements ContactService {
     public ContactResponse getContactByTrackingId(UUID trackingId) {
         Contact contact = contactRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> {
-                    log.error("Contact introuvable lors de la recherche : {}", trackingId);
+                    LOG.error("Contact introuvable lors de la recherche : {}", trackingId);
                     return new IllegalArgumentException("Contact introuvable");
                 });
         return contactMapper.toResponse(contact);
@@ -139,7 +139,7 @@ public class ContactServiceImpl implements ContactService {
     public ContactResponse changeConsentStatus(UUID trackingId, ConsentStatus newStatus, String ipAddress) {
         Contact contact = contactRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> {
-                    log.error("Contact introuvable pour modification du consentement : {}", trackingId);
+                    LOG.error("Contact introuvable pour modification du consentement : {}", trackingId);
                     return new IllegalArgumentException("Contact introuvable");
                 });
 
@@ -149,7 +149,7 @@ public class ContactServiceImpl implements ContactService {
 
             ConsentAction action = (newStatus == ConsentStatus.OPT_IN) ? ConsentAction.GRANTED : ConsentAction.REVOKED;
             consentLogService.recordLog(contact, action, ipAddress);
-            log.info("Statut de consentement mis à jour : trackingId={}, nouveauStatut={}", trackingId, newStatus);
+            LOG.info("Statut de consentement mis à jour : trackingId={}, nouveauStatut={}", trackingId, newStatus);
         }
 
         return contactMapper.toResponse(contact);
@@ -197,11 +197,11 @@ public class ContactServiceImpl implements ContactService {
                 }
             }
         } catch (Exception e) {
-            log.error("Erreur lors de la lecture du fichier CSV d'importation", e);
+            LOG.error("Erreur lors de la lecture du fichier CSV d'importation", e);
             throw new RuntimeException("Erreur lors de la lecture du fichier CSV : " + e.getMessage());
         }
 
-        log.info("Importation CSV terminée. Total: {}, Importés: {}, Ignorés: {}, Erreurs: {}",
+        LOG.info("Importation CSV terminée. Total: {}, Importés: {}, Ignorés: {}, Erreurs: {}",
                 total, imported, ignored, errors);
         return new ImportResult(total, imported, ignored, errors);
     }
@@ -230,7 +230,7 @@ public class ContactServiceImpl implements ContactService {
             contactRepository.save(contact);
             return true;
         } catch (Exception e) {
-            log.warn("Erreur lors de l'enregistrement du contact importé (email={})", email, e);
+            LOG.warn("Erreur lors de l'enregistrement du contact importé (email={})", email, e);
             return false;
         }
     }
