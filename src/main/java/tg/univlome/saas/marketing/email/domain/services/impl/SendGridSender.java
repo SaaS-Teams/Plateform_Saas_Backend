@@ -1,4 +1,4 @@
-package tg.univlome.saas.email.domain.services.impl;
+package tg.univlome.saas.marketing.email.domain.services.impl;
 
 
 import com.sendgrid.Method;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import tg.univlome.saas.email.application.dtos.requests.EmailMessage;
+import tg.univlome.saas.marketing.email.application.dtos.requests.EmailMessage;
 
 
 @Component

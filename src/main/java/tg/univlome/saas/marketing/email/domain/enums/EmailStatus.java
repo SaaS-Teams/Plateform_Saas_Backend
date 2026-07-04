@@ -1,4 +1,4 @@
-package tg.univlome.saas.email.domain.enums;
+package tg.univlome.saas.marketing.email.domain.enums;
 
 public enum EmailStatus {
     PENDING,

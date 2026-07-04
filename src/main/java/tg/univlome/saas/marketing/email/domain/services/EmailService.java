@@ -1,6 +1,6 @@
-package tg.univlome.saas.email.domain.services;
+package tg.univlome.saas.marketing.email.domain.services;
 
-import tg.univlome.saas.email.application.dtos.requests.EmailMessage;
+import tg.univlome.saas.marketing.email.application.dtos.requests.EmailMessage;
 
 public interface EmailService {
     /**

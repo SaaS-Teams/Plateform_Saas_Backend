@@ -1,4 +1,4 @@
-package tg.univlome.saas.email.domain.services.impl;
+package tg.univlome.saas.marketing.email.domain.services.impl;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -7,11 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import tg.univlome.saas.email.application.dtos.requests.EmailMessage;
-import tg.univlome.saas.email.domain.enums.EmailStatus;
-import tg.univlome.saas.email.domain.models.EmailLog;
-import tg.univlome.saas.email.domain.services.EmailService;
-import tg.univlome.saas.email.repositories.EmailLogRepository;
+import tg.univlome.saas.marketing.email.application.dtos.requests.EmailMessage;
+import tg.univlome.saas.marketing.email.domain.enums.EmailStatus;
+import tg.univlome.saas.marketing.email.domain.models.EmailLog;
+import tg.univlome.saas.marketing.email.domain.services.EmailService;
+import tg.univlome.saas.marketing.email.repositories.EmailLogRepository;
 @Slf4j
 @Service
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package tg.univlome.saas.email.application.dtos.requests;
+package tg.univlome.saas.marketing.email.application.dtos.requests;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -19,12 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import tg.univlome.saas.email.application.dtos.requests.EmailMessage;
-import tg.univlome.saas.email.domain.enums.EmailStatus;
-import tg.univlome.saas.email.domain.models.EmailLog;
-import tg.univlome.saas.email.domain.services.impl.EmailServiceImpl;
-import tg.univlome.saas.email.domain.services.impl.SendGridSender;
-import tg.univlome.saas.email.repositories.EmailLogRepository;
+import tg.univlome.saas.marketing.email.application.dtos.requests.EmailMessage;
+import tg.univlome.saas.marketing.email.domain.enums.EmailStatus;
+import tg.univlome.saas.marketing.email.domain.models.EmailLog;
+import tg.univlome.saas.marketing.email.domain.services.impl.EmailServiceImpl;
+import tg.univlome.saas.marketing.email.domain.services.impl.SendGridSender;
+import tg.univlome.saas.marketing.email.repositories.EmailLogRepository;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceImplTest {

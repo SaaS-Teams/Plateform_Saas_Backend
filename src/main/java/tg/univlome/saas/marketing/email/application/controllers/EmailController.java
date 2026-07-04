@@ -1,4 +1,4 @@
-package tg.univlome.saas.email.application.controllers;
+package tg.univlome.saas.marketing.email.application.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tg.univlome.saas.email.application.dtos.requests.EmailMessage;
-import tg.univlome.saas.email.domain.services.EmailService;
+import tg.univlome.saas.marketing.email.application.dtos.requests.EmailMessage;
+import tg.univlome.saas.marketing.email.domain.services.EmailService;
 
 @RestController
 @RequestMapping("/emails")
