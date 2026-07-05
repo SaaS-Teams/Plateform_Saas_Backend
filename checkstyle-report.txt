@@ -1,0 +1,40 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;33mWARNING[m] 
+[[1;33mWARNING[m] Some problems were encountered while building the effective model for tg.univlome:saas:jar:0.0.1-SNAPSHOT
+[[1;33mWARNING[m] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.opencsv:opencsv:jar -> version 5.9 vs ${opencsv.version} @ line 142, column 15
+[[1;33mWARNING[m] 
+[[1;33mWARNING[m] It is highly recommended to fix these problems because they threaten the stability of your build.
+[[1;33mWARNING[m] 
+[[1;33mWARNING[m] For this reason, future Maven versions might no longer support building such malformed projects.
+[[1;33mWARNING[m] 
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--------------------------< [0;36mtg.univlome:saas[0;1m >--------------------------[m
+[[1;34mINFO[m] [1mBuilding saas 0.0.1-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-checkstyle-plugin:3.4.0:check[m [1m(default-cli)[m @ [36msaas[0;1m ---[m
+[[1;34mINFO[m] Début de la vérification...
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/domain/models/Campagne.java:6:1: L'ordre d'import n'est pas respecté : 'jakarta.persistence.*'. [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/domain/models/Campagne.java:6:1: Séparation supplémentaire dans le groupe d'importation avant 'jakarta.persistence.*' [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/domain/services/CampagneService.java:6:1: Séparation supplémentaire dans le groupe d'importation avant 'tg.univlome.saas.marketing.campagne.application.dtos.request.CampagneRequest' [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/domain/services/impl/CampagneServiceImpl.java:7:1: Séparation supplémentaire dans le groupe d'importation avant 'lombok.RequiredArgsConstructor' [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/repositories/CampagneRepository.java:6:1: Séparation supplémentaire dans le groupe d'importation avant 'org.springframework.data.jpa.repository.JpaRepository' [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/application/controllers/CampagneController.java:1: Il manque un caractère NewLine à la fin du fichier. [NewlineAtEndOfFile]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/application/controllers/CampagneController.java:6:1: L'ordre d'import n'est pas respecté : 'io.swagger.v3.oas.annotations.Operation'. [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/application/controllers/CampagneController.java:6:1: Séparation supplémentaire dans le groupe d'importation avant 'io.swagger.v3.oas.annotations.Operation' [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/campagne/application/dtos/response/CampagneResponse.java:6:1: Séparation supplémentaire dans le groupe d'importation avant 'tg.univlome.saas.marketing.campagne.domain.enums.CampagneStatus' [ImportOrder]
+[ERROR] /home/jude/Public/Plateform_Saas_Backend/src/main/java/tg/univlome/saas/marketing/contact/domain/services/impl/ContactServiceImpl.java:33:33: Le nom 'log' n'est pas conforme à l'expression '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'. [ConstantName]
+Vérification terminée.
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;31mBUILD FAILURE[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  5.615 s
+[[1;34mINFO[m] Finished at: 2026-07-04T20:59:03Z
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;31mERROR[m] Failed to execute goal [32morg.apache.maven.plugins:maven-checkstyle-plugin:3.4.0:check[m [1m(default-cli)[m on project [36msaas[m: [1;31mFailed during checkstyle execution[m: There are 10 errors reported by Checkstyle 10.20.1 with checkstyle.xml ruleset. -> [1m[Help 1][m
+[[1;31mERROR[m] 
+[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
+[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
+[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
