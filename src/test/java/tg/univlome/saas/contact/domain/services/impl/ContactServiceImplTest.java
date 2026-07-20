@@ -97,7 +97,7 @@ class ContactServiceImplTest {
         when(contactRepository.findByEmail("doublon@mail.com")).thenReturn(Optional.of(existingContact));
 
         // --- 2. ACT & ASSERT ---
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        tg.univlome.saas.shared.exceptions.ConflictException exception = assertThrows(tg.univlome.saas.shared.exceptions.ConflictException.class, () -> {
             contactService.createContact(request, "192.168.1.1");
         });
 

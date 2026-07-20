@@ -112,11 +112,11 @@ class WorkflowServiceImplTest {
     void shouldUpdateWorkflowWhenExists() {
         // Given
         UUID trackingId = UUID.randomUUID();
-        WorkflowRequest request = new WorkflowRequest("Updated Name", "Updated Desc", WorkflowStatus.INACTIVE, "MANUAL", "{}");
+        WorkflowRequest request = new WorkflowRequest("Updated Name", "Updated Desc", WorkflowStatus.PAUSED, "MANUAL", "{}");
         Workflow existingWorkflow = new Workflow();
         existingWorkflow.setTrackingId(trackingId);
         
-        WorkflowResponse expectedResponse = new WorkflowResponse(trackingId, "Updated Name", "Updated Desc", WorkflowStatus.INACTIVE, "MANUAL", "{}", LocalDateTime.now(), LocalDateTime.now());
+        WorkflowResponse expectedResponse = new WorkflowResponse(trackingId, "Updated Name", "Updated Desc", WorkflowStatus.PAUSED, "MANUAL", "{}", LocalDateTime.now(), LocalDateTime.now());
 
         given(workflowRepository.findByTrackingId(trackingId)).willReturn(Optional.of(existingWorkflow));
         given(workflowRepository.save(any(Workflow.class))).willReturn(existingWorkflow);

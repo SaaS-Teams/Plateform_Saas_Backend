@@ -20,7 +20,7 @@ public class EmailServiceImpl implements EmailService {
     private final EmailLogRepository emailLogRepository;
     private final SendGridSender sendGridSender; // Notre nouveau sous-composant avec Retry
 
-    @Value("${sendgrid.api-key}")
+    @Value("${sendgrid.api-key:default_key}")
     private String sendGridApiKey;
 
     @Value("${app.email.sender:contact@saas-marketing.tg}")

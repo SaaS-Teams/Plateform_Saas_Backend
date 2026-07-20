@@ -51,7 +51,7 @@ class WorkflowExecutionServiceImplTest {
         // Given
         UUID workflowTrackingId = UUID.randomUUID();
         Long contactId = 1L;
-        WorkflowExecutionRequest request = new WorkflowExecutionRequest(workflowTrackingId, contactId, "START");
+        WorkflowExecutionRequest request = new WorkflowExecutionRequest(workflowTrackingId, contactId, ExecutionStatus.IN_PROGRESS, "START", null, LocalDateTime.now(), null);
 
         Workflow workflow = new Workflow();
         workflow.setId(10L);
@@ -83,7 +83,7 @@ class WorkflowExecutionServiceImplTest {
     void shouldThrowResourceNotFoundWhenWorkflowMissingOnStart() {
         // Given
         UUID workflowTrackingId = UUID.randomUUID();
-        WorkflowExecutionRequest request = new WorkflowExecutionRequest(workflowTrackingId, 1L, "START");
+        WorkflowExecutionRequest request = new WorkflowExecutionRequest(workflowTrackingId, 1L, ExecutionStatus.IN_PROGRESS, "START", null, LocalDateTime.now(), null);
 
         given(workflowRepository.findByTrackingId(workflowTrackingId)).willReturn(Optional.empty());
 
