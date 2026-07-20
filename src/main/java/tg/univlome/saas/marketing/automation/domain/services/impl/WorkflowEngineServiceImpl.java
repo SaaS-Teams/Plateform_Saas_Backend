@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,8 @@ import tg.univlome.saas.marketing.automation.domain.models.WorkflowExecutionLog;
 import tg.univlome.saas.marketing.automation.domain.services.WorkflowEngineService;
 import tg.univlome.saas.marketing.automation.domain.services.WorkflowProducerService;
 import tg.univlome.saas.marketing.automation.repositories.WorkflowExecutionLogRepository;
-
-import java.util.List;
+import tg.univlome.saas.marketing.email.application.dtos.requests.EmailMessage;
+import tg.univlome.saas.marketing.email.domain.services.EmailService;
 
 @Slf4j
 @Service
@@ -24,10 +25,11 @@ import java.util.List;
 public class WorkflowEngineServiceImpl implements WorkflowEngineService {
 
     private final WorkflowExecutionLogRepository executionRepository;
+    private final EmailService emailService;
     private final ObjectMapper objectMapper;
     private final WorkflowProducerService producerService;
 
-    // TODO: Injecter les services externes (comme EmailService) quand on voudra exécuter de vraies actions
+    // Injecter les services externes (comme EmailService) quand on voudra exécuter de vraies actions
 
     @Override
     @Transactional
@@ -53,9 +55,8 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
             WorkflowNode currentNode = findNodeInFlowData(flowDataJson, message.nodeId());
 
             if (currentNode == null) {
-                // Fin de parcours ou nœud introuvable
-                completeExecution(execution);
-                return;
+                // Nœud introuvable
+                throw new IllegalArgumentException("Nœud introuvable dans le scénario : " + message.nodeId());
             }
 
             // 3. Exécuter l'action selon le type du Nœud
@@ -98,7 +99,9 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
         JsonNode root = objectMapper.readTree(json);
         JsonNode nodesArray = root.get("nodes");
 
-        if (nodesArray == null || !nodesArray.isArray()) return null;
+        if (nodesArray == null || !nodesArray.isArray()) {
+            return null;
+        }
 
         List<WorkflowNode> nodes = objectMapper.convertValue(nodesArray, new TypeReference<>() {});
 
@@ -114,13 +117,31 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
 
         switch (node.type()) {
             case "ACTION_EMAIL":
+                // 1. Extraction des paramètres depuis le dessin du front-end
                 String templateId = (String) node.data().get("templateId");
-                log.info("-> [Simulation] Envoi d'un email avec le template {} au contact {}", templateId, execution.getContact().getId());
+                String subject = (String) node.data().getOrDefault("subject", "Nouveau message pour vous");
+
+                // 2. Récupération de l'e-mail du contact (je suppose getEmail() sur ton entité Contact)
+                String contactEmail = execution.getContact().getEmail();
+
+                log.info("-> Envoi RÉEL d'un email (Sujet: {}) au contact {}", subject, contactEmail);
+
+                // 3. Création du DTO attendu par ton module Email
+                // (Si ton EmailMessage utilise un builder, tu peux utiliser EmailMessage.builder()...)
+                EmailMessage emailMsg = new EmailMessage(
+                        contactEmail,
+                        subject,
+                        "Ceci est le contenu généré par le scénario. Template: " + templateId,
+                        false
+                );
+
+                // 4. Appel du vrai service (qui utilise SendGrid en arrière-plan selon ton architecture)
+                emailService.sendEmail(emailMsg);
                 break;
 
             case "WAIT":
                 Integer days = (Integer) node.data().get("days");
-                log.info("-> [Simulation] Mise en attente de {} jours", days);
+                log.info("-> [Simulation] Mise en attente de {} jours (nécessitera un Quartz/CRON plus tard)", days);
                 break;
 
             default:

@@ -3,41 +3,51 @@ package tg.univlome.saas.marketing.automation.domain.services.impl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowStepMessage;
+import tg.univlome.saas.marketing.automation.domain.services.WorkflowEngineService;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WorkflowConsumerTest {
+
+    @Mock
+    private WorkflowEngineService engineService;
 
     @InjectMocks
     private WorkflowConsumer workflowConsumer;
 
     @Test
-    void shouldReceiveStepMessageSuccessfully() {
+    void shouldDelegateMessageToEngineSuccessfully() {
         // Given
         UUID trackingId = UUID.randomUUID();
         WorkflowStepMessage message = new WorkflowStepMessage(trackingId, "node_1", "SEND_EMAIL");
 
-        // When / Then
-        // As there is no external dependency yet, we just ensure no exception is thrown
-        assertThatCode(() -> workflowConsumer.receiveStepMessage(message))
-                .doesNotThrowAnyException();
+        // When
+        workflowConsumer.receiveStepMessage(message);
+
+        // Then
+        verify(engineService, times(1)).processStep(message);
     }
 
     @Test
-    void shouldThrowExceptionWhenMessageProcessingFails() {
+    void shouldThrowExceptionWhenEngineFails() {
         // Given
-        // This is a placeholder test. Since the consumer currently just logs and doesn't throw on normal inputs,
-        // to test the catch block, we would typically mock a service it calls. 
-        // For now, if we pass null, it might throw a NullPointerException depending on logging or other usage.
+        UUID trackingId = UUID.randomUUID();
+        WorkflowStepMessage message = new WorkflowStepMessage(trackingId, "node_1", "SEND_EMAIL");
         
+        doThrow(new RuntimeException("Test Exception")).when(engineService).processStep(message);
+
         // When / Then
-        assertThatThrownBy(() -> workflowConsumer.receiveStepMessage(null))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> workflowConsumer.receiveStepMessage(message))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Test Exception");
+                
+        verify(engineService, times(1)).processStep(message);
     }
 }

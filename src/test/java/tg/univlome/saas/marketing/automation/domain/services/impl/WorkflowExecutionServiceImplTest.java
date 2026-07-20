@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowExecutionRequest;
 import tg.univlome.saas.marketing.automation.application.dtos.responses.WorkflowExecutionResponse;
 import tg.univlome.saas.marketing.automation.application.mappers.WorkflowExecutionMapper;
+import tg.univlome.saas.marketing.automation.domain.services.WorkflowProducerService;
 import tg.univlome.saas.marketing.automation.domain.enums.ExecutionStatus;
 import tg.univlome.saas.marketing.automation.domain.models.Workflow;
 import tg.univlome.saas.marketing.automation.domain.models.WorkflowExecutionLog;
@@ -42,6 +43,9 @@ class WorkflowExecutionServiceImplTest {
 
     @Mock
     private WorkflowExecutionMapper executionMapper;
+
+    @Mock
+    private WorkflowProducerService producerService;
 
     @InjectMocks
     private WorkflowExecutionServiceImpl executionService;
