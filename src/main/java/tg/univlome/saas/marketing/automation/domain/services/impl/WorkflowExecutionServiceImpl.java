@@ -9,12 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowExecutionRequest;
+import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowStepMessage;
 import tg.univlome.saas.marketing.automation.application.dtos.responses.WorkflowExecutionResponse;
 import tg.univlome.saas.marketing.automation.application.mappers.WorkflowExecutionMapper;
 import tg.univlome.saas.marketing.automation.domain.enums.ExecutionStatus;
 import tg.univlome.saas.marketing.automation.domain.models.Workflow;
 import tg.univlome.saas.marketing.automation.domain.models.WorkflowExecutionLog;
 import tg.univlome.saas.marketing.automation.domain.services.WorkflowExecutionService;
+import tg.univlome.saas.marketing.automation.domain.services.WorkflowProducerService;
 import tg.univlome.saas.marketing.automation.repositories.WorkflowExecutionLogRepository;
 import tg.univlome.saas.marketing.automation.repositories.WorkflowRepository;
 import tg.univlome.saas.marketing.contact.domain.models.Contact;
@@ -28,20 +30,34 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     private final WorkflowRepository workflowRepository;
     private final ContactRepository contactRepository;
     private final WorkflowExecutionMapper executionMapper;
+    private final WorkflowProducerService producerService;
+
     @Override
     @Transactional
     public WorkflowExecutionResponse startExecution(WorkflowExecutionRequest request) {
-        // 1. Récupération du Workflow
+
         Workflow workflow = workflowRepository.findByTrackingId(request.workflowTrackingId())
                 .orElseThrow(() -> new ResourceNotFoundException("Scénario introuvable : " + request.workflowTrackingId()));
-        // 2. Récupération du Contact
+
         Contact contact = contactRepository.findById(request.contactId())
                 .orElseThrow(() -> new ResourceNotFoundException("Contact introuvable : " + request.contactId()));
-        // 3. Utilisation de ton mapper manuel avec les entités récupérées
+
         WorkflowExecutionLog log = executionMapper.toEntity(request, workflow, contact);
+
+        log.setStatus(ExecutionStatus.PENDING);
         WorkflowExecutionLog savedLog = executionRepository.save(log);
+
+        WorkflowStepMessage firstMessage = new WorkflowStepMessage(
+                savedLog.getExecutionTrackingId(),
+                "START_NODE",
+                "START_EXECUTION"
+        );
+
+        producerService.sendStepToQueue(firstMessage);
+
         return executionMapper.toResponse(savedLog);
     }
+
     @Override
     @Transactional(readOnly = true)
     public WorkflowExecutionResponse getExecutionByTrackingId(UUID executionTrackingId) {

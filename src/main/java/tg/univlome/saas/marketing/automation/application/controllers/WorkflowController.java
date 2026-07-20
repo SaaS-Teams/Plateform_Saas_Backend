@@ -42,6 +42,7 @@ public class WorkflowController {
     public ResponseEntity<WorkflowResponse> createWorkflow(@Valid @RequestBody WorkflowRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(workflowService.createWorkflow(request));
     }
+
     @GetMapping
     @Operation(summary = "Lister tous les scénarios",
             description = "Récupère la liste de toutes les campagnes d'automatisation (Brouillons, "
@@ -49,6 +50,7 @@ public class WorkflowController {
     public ResponseEntity<List<WorkflowResponse>> getAllWorkflows() {
         return ResponseEntity.ok(workflowService.getAllWorkflows());
     }
+
     @GetMapping("/{trackingId}")
     @Operation(summary = "Obtenir les détails d'un scénario",
             description = "Récupère la structure complète d'un parcours (incluant son flowData JSON) "
@@ -61,6 +63,7 @@ public class WorkflowController {
             @Parameter(description = "L'UUID public du scénario") @PathVariable UUID trackingId) {
         return ResponseEntity.ok(workflowService.getWorkflowByTrackingId(trackingId));
     }
+
     @PutMapping("/{trackingId}")
     @Operation(summary = "Mettre à jour un scénario",
             description = "Écrase la définition d'un scénario existant. Utilisé lorsque "
@@ -74,6 +77,7 @@ public class WorkflowController {
             @Valid @RequestBody WorkflowRequest request) {
         return ResponseEntity.ok(workflowService.updateWorkflow(trackingId, request));
     }
+
     @DeleteMapping("/{trackingId}")
     @Operation(summary = "Supprimer un scénario", description = "Supprime définitivement un scénario d'automatisation.")
     @ApiResponse(responseCode = "204", description = "Scénario supprimé avec succès")

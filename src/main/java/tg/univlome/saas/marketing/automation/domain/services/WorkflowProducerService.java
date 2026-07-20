@@ -4,4 +4,5 @@ import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowS
 
 public interface WorkflowProducerService {
     void sendStepToQueue(WorkflowStepMessage message);
+
 }
