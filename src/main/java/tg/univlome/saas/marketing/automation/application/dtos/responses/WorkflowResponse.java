@@ -1,11 +1,10 @@
 package tg.univlome.saas.marketing.automation.application.dtos.responses;
 
-package tg.univlome.saas.marketing.automation.application.dtos.response;
 
-import tg.univlome.saas.marketing.automation.domain.enums.WorkflowStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import tg.univlome.saas.marketing.automation.domain.enums.WorkflowStatus;
 
 public record WorkflowResponse(
         UUID trackingId,

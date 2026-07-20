@@ -25,6 +25,8 @@ import tg.univlome.saas.marketing.contact.domain.models.Contact;
 import tg.univlome.saas.marketing.contact.domain.services.ConsentLogService;
 import tg.univlome.saas.marketing.contact.domain.services.ContactService;
 import tg.univlome.saas.marketing.contact.repositories.ContactRepository;
+import tg.univlome.saas.shared.exceptions.ConflictException;
+import tg.univlome.saas.shared.exceptions.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class ContactServiceImpl implements ContactService {
      * @param request  les données du contact à créer
      * @param ipAddress l'adresse IP du client pour l'enregistrement du consentement
      * @return le contact créé sous forme de DTO
-     * @throws IllegalArgumentException si un contact avec le même email existe déjà
+     * @throws ConflictException si un contact avec le même email existe déjà
      */
     @Override
     @Transactional
@@ -50,7 +52,7 @@ public class ContactServiceImpl implements ContactService {
         // 1. Règle métier : Déduplication
         if (contactRepository.findByEmail(request.email()).isPresent()) {
             LOG.warn("Tentative de création d'un contact avec un email existant : {}", request.email());
-            throw new IllegalArgumentException("Un contact avec cet email existe déjà.");
+            throw new ConflictException("Un contact avec cet email existe déjà.");
         }
 
         // 2. Création
@@ -70,7 +72,8 @@ public class ContactServiceImpl implements ContactService {
      * @param trackingId l'identifiant de suivi du contact
      * @param request les nouvelles données du contact
      * @return le contact mis à jour sous forme de DTO
-     * @throws IllegalArgumentException si le contact n'existe pas ou si l'email est déjà utilisé
+     * @throws ResourceNotFoundException si le contact n'existe pas
+     * @throws ConflictException si l'email est déjà utilisé
      */
     @Override
     @Transactional
@@ -78,13 +81,13 @@ public class ContactServiceImpl implements ContactService {
         Contact contact = contactRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> {
                     LOG.error("Tentative de mise à jour d'un contact introuvable : {}", trackingId);
-                    return new IllegalArgumentException("Contact introuvable");
+                    return new ResourceNotFoundException("Contact introuvable");
                 });
 
         // On empêche la modification de l'email si un autre compte l'utilise déjà
         if (!contact.getEmail().equals(request.email()) && contactRepository.findByEmail(request.email()).isPresent()) {
             LOG.warn("Tentative d'utilisation d'un email déjà pris : {}", request.email());
-            throw new IllegalArgumentException("Cet email est déjà pris par un autre contact.");
+            throw new ConflictException("Cet email est déjà pris par un autre contact.");
         }
 
         contactMapper.updateEntityFromRequest(request, contact);
@@ -99,7 +102,7 @@ public class ContactServiceImpl implements ContactService {
      *
      * @param trackingId l'identifiant de suivi du contact
      * @return le contact sous forme de DTO
-     * @throws IllegalArgumentException si le contact n'existe pas
+     * @throws ResourceNotFoundException si le contact n'existe pas
      */
     @Override
     @Transactional(readOnly = true)
@@ -107,7 +110,7 @@ public class ContactServiceImpl implements ContactService {
         Contact contact = contactRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> {
                     LOG.error("Contact introuvable lors de la recherche : {}", trackingId);
-                    return new IllegalArgumentException("Contact introuvable");
+                    return new ResourceNotFoundException("Contact introuvable");
                 });
         return contactMapper.toResponse(contact);
     }
@@ -132,7 +135,7 @@ public class ContactServiceImpl implements ContactService {
      * @param newStatus le nouveau statut de consentement
      * @param ipAddress l'adresse IP du client pour l'enregistrement du journal
      * @return le contact avec le statut mis à jour sous forme de DTO
-     * @throws IllegalArgumentException si le contact n'existe pas
+     * @throws ResourceNotFoundException si le contact n'existe pas
      */
     @Override
     @Transactional
@@ -140,7 +143,7 @@ public class ContactServiceImpl implements ContactService {
         Contact contact = contactRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> {
                     LOG.error("Contact introuvable pour modification du consentement : {}", trackingId);
-                    return new IllegalArgumentException("Contact introuvable");
+                    return new ResourceNotFoundException("Contact introuvable");
                 });
 
         if (contact.getConsentStatus() != newStatus) {
@@ -163,6 +166,7 @@ public class ContactServiceImpl implements ContactService {
      * @throws RuntimeException en cas d'erreur de lecture du fichier
      */
     @Override
+    @Transactional
     public ImportResult importContactsFromCsv(MultipartFile file) {
         int total = 0;
         int imported = 0;
