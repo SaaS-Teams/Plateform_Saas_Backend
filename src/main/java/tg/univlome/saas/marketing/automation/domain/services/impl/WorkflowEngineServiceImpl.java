@@ -67,11 +67,8 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
             execution.setCurrentNodeId(nextStepId);
 
             if (nextStepId != null && !nextStepId.trim().isEmpty()) {
-                // Il y a une suite ! On sauvegarde l'état actuel...
                 executionRepository.save(execution);
 
-                // ... ET on envoie un nouveau message à RabbitMQ pour l'étape suivante.
-                // Cela relance automatiquement la boucle de l'automatisation.
                 WorkflowStepMessage nextMessage = new WorkflowStepMessage(
                         execution.getExecutionTrackingId(),
                         nextStepId,

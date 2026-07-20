@@ -28,23 +28,30 @@ public class Workflow {
     @Column(name = "tracking_id", unique = true, updatable = false, nullable = false)
     @Builder.Default
     private UUID trackingId = UUID.randomUUID();
+
     @Column(nullable = false)
     private String name;
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WorkflowStatus status;
+
     // Type de déclencheur (ex: "COMPORTEMENT_CLIC", "DATE_ANNIVERSAIRE")
-    @Column(name = "trigger_type", nullable = false)
+    @Column(name = "trigger_type")
     private String triggerType;
     // C'est ici la magie : on stocke l'arbre logique généré par le front-end directement en JSONB
     @JdbcTypeCode(SqlTypes.JSON)
+
     @Column(name = "flow_data", columnDefinition = "jsonb", nullable = false)
     private String flowData;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
