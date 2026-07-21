@@ -3,6 +3,7 @@ package tg.univlome.saas.marketing.email.domain.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import tg.univlome.saas.marketing.email.domain.enums.EmailStatus;
@@ -16,6 +17,9 @@ public class EmailLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "tracking_id", nullable = false, unique = true, updatable = false)
+    private UUID trackingId = UUID.randomUUID();
 
     @Column(nullable = false)
     private String sender;
