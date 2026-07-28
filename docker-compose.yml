@@ -1,5 +1,7 @@
+version: '3.8'
+
 services:
-  # Base de données PostgreSQL
+  # ── Existant : Base de données PostgreSQL ──
   postgres:
     image: postgres:16-alpine
     container_name: saas_postgres
@@ -18,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Cache Redis
+  # ── Existant : Cache Redis ──
   redis:
     image: redis:7-alpine
     container_name: saas_redis
@@ -34,6 +36,52 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── Nouveau : Moteur d'automation (RabbitMQ) ──
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: saas-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+  # ── Nouveau : Données non structurées (MongoDB) ──
+  mongodb:
+    image: mongo:6.0
+    container_name: saas-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: mongo_password
+      MONGO_INITDB_DATABASE: saas_nosql_db
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  # ── Nouveau : Moteur de tri (Elasticsearch) ──
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: saas-elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+# ── Déclaration de tous les volumes de sauvegarde ──
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:
+  mongodb_data:
+  elasticsearch_data:
