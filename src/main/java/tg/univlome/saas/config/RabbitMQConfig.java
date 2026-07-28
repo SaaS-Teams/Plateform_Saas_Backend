@@ -52,6 +52,19 @@ public class RabbitMQConfig {
     @Value("${saas.rabbitmq.routing-key.dlq:workflow.step.dead}")
     private String deadLetterRoutingKey;
 
+    // ══════════════════════════════════════════════════════════════
+    // Ingestion Webhooks Entrants (Events Inbound)
+    // ══════════════════════════════════════════════════════════════
+
+    @Value("${saas.rabbitmq.exchange.inbound:inbound-events-exchange}")
+    private String inboundExchange;
+
+    @Value("${saas.rabbitmq.queue.inbound:inbound-events-queue}")
+    private String inboundQueue;
+
+    @Value("${saas.rabbitmq.routing-key.inbound:inbound.event.receive}")
+    private String inboundRoutingKey;
+
     // ── File principale ──────────────────────────────────────────
 
     /**
@@ -120,6 +133,34 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(deadLetterQueue)
                 .to(deadLetterExchange)
                 .with(deadLetterRoutingKey);
+    }
+
+    // ── File & Exchange Webhooks Entrants (Inbound Events) ───────
+
+    /**
+     * Exchange dédié à la réception des événements webhooks entrants (SendGrid, Twilio, etc.).
+     */
+    @Bean
+    public TopicExchange inboundExchange() {
+        return new TopicExchange(inboundExchange);
+    }
+
+    /**
+     * File de stockage tampon des événements webhooks entrants.
+     */
+    @Bean
+    public Queue inboundQueue() {
+        return QueueBuilder.durable(inboundQueue).build();
+    }
+
+    /**
+     * Binding entre la file d'événements entrants et l'exchange d'ingestion.
+     */
+    @Bean
+    public Binding bindingInbound(Queue inboundQueue, TopicExchange inboundExchange) {
+        return BindingBuilder.bind(inboundQueue)
+                .to(inboundExchange)
+                .with(inboundRoutingKey);
     }
 
     // ── Convertisseur JSON ───────────────────────────────────────
