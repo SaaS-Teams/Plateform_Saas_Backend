@@ -56,6 +56,9 @@ public class Contact {
     @Column(name = "country")
     private String country;
 
+    @Column(name = "phone")
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "consent_status", nullable = false)
     private ConsentStatus consentStatus = ConsentStatus.PENDING;
