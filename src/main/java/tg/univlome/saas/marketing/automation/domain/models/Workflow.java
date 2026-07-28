@@ -48,6 +48,9 @@ public class Workflow {
     @Column(name = "flow_data", columnDefinition = "jsonb", nullable = false)
     private String flowData;
 
+    @Column(name = "canvas_definition", columnDefinition = "TEXT")
+    private String canvasDefinition;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
