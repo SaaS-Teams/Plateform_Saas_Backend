@@ -34,6 +34,7 @@
 		<opencsv.version>5.9</opencsv.version>
 		<sendgrid.version>4.10.2</sendgrid.version>
 		<springdoc.version>2.7.0</springdoc.version>
+		<bucket4j.version>8.17.0</bucket4j.version>
 
 		<!-- Versions des plugins -->
 		<jacoco.version>0.8.12</jacoco.version>
@@ -208,6 +209,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+
+		<!-- ── Bucket4j (Rate Limiting HTTP) ───────────────────── -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>${bucket4j.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

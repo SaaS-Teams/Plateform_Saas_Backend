@@ -13,6 +13,7 @@ import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowN
 import tg.univlome.saas.marketing.automation.application.dtos.requests.WorkflowStepMessage;
 import tg.univlome.saas.marketing.automation.domain.enums.ExecutionStatus;
 import tg.univlome.saas.marketing.automation.domain.models.WorkflowExecutionLog;
+import tg.univlome.saas.marketing.automation.domain.services.ConditionEvaluatorService;
 import tg.univlome.saas.marketing.automation.domain.services.WorkflowEngineService;
 import tg.univlome.saas.marketing.automation.domain.services.WorkflowProducerService;
 import tg.univlome.saas.marketing.automation.repositories.WorkflowExecutionLogRepository;
@@ -28,8 +29,7 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
     private final EmailService emailService;
     private final ObjectMapper objectMapper;
     private final WorkflowProducerService producerService;
-
-    // Injecter les services externes (comme EmailService) quand on voudra exécuter de vraies actions
+    private final ConditionEvaluatorService conditionEvaluator;
 
     @Override
     @Transactional
@@ -63,7 +63,9 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
             executeNodeAction(currentNode, execution);
 
             // 4. Préparer et déclencher l'étape suivante (L'Effet Domino)
-            String nextStepId = currentNode.nextStepId();
+            //    Pour un nœud CONDITION, le prochain nœud dépend du résultat de l'évaluation.
+            //    Pour les autres types, on utilise le chaînage séquentiel classique (nextStepId).
+            String nextStepId = resolveNextStepId(currentNode, execution);
             execution.setCurrentNodeId(nextStepId);
 
             if (nextStepId != null && !nextStepId.trim().isEmpty()) {
@@ -141,9 +143,50 @@ public class WorkflowEngineServiceImpl implements WorkflowEngineService {
                 log.info("-> [Simulation] Mise en attente de {} jours (nécessitera un Quartz/CRON plus tard)", days);
                 break;
 
+            case "CONDITION":
+                // Pas d'action à exécuter ici : le nœud CONDITION est un aiguillage pur.
+                // L'évaluation et le routage sont gérés par resolveNextStepId().
+                log.info("-> Nœud conditionnel [{}] détecté. Évaluation déléguée au routage.", node.nodeId());
+                break;
+
             default:
                 log.warn("Type de nœud inconnu : {}", node.type());
         }
+    }
+
+    /**
+     * Détermine l'identifiant du prochain nœud à exécuter.
+     *
+     * <p>Pour un nœud de type {@code CONDITION}, évalue la condition via
+     * le {@link ConditionEvaluatorService} et retourne {@code nextStepIdIfTrue}
+     * ou {@code nextStepIdIfFalse} selon le résultat.</p>
+     *
+     * <p>Pour tous les autres types de nœuds, retourne le {@code nextStepId}
+     * classique (chaînage séquentiel).</p>
+     *
+     * @param node      le nœud courant
+     * @param execution le journal d'exécution (contient le contact)
+     * @return l'identifiant du prochain nœud, ou {@code null} si c'est la fin du parcours
+     */
+    private String resolveNextStepId(WorkflowNode node, WorkflowExecutionLog execution) {
+        if ("CONDITION".equals(node.type())) {
+            // Récupérer l'ID du contact pour l'évaluation
+            String contactId = execution.getContact().getId().toString();
+
+            // Déléguer l'évaluation au service spécialisé
+            boolean conditionResult = conditionEvaluator.evaluateCondition(node.data(), contactId);
+
+            // Aiguillage : branche IF (true) ou ELSE (false)
+            String nextId = conditionResult ? node.nextStepIdIfTrue() : node.nextStepIdIfFalse();
+
+            log.info("-> Résultat de la condition : {} — Prochain nœud : [{}]",
+                    conditionResult ? "VRAI (IF)" : "FAUX (ELSE)", nextId);
+
+            return nextId;
+        }
+
+        // Chaînage séquentiel classique pour les nœuds non-conditionnels
+        return node.nextStepId();
     }
 
     private void completeExecution(WorkflowExecutionLog execution) {
