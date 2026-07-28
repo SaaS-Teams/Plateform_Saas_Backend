@@ -221,6 +221,12 @@
 			<artifactId>bucket4j_jdk17-core</artifactId>
 			<version>${bucket4j.version}</version>
 		</dependency>
+
+		<!-- ── Quartz Scheduler (Nœud WAIT — persistance JDBC) ── -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
