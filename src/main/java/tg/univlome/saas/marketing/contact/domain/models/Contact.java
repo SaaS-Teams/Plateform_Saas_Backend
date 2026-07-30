@@ -1,28 +1,46 @@
 package tg.univlome.saas.marketing.contact.domain.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentStatus;
+import tg.univlome.saas.shared.security.tenant.TenantListener;
 
 @Entity
 @Table(name = "CONTACTS")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EntityListeners(TenantListener.class)
+@FilterDef(
+        name = "tenantFilter",
+        parameters = @ParamDef(name = "tenantId", type = java.util.UUID.class)
+)
+@Filter(
+        name = "tenantFilter",
+        condition = "workspace_tracking_id = :tenantId"
+)
 public class Contact {
 
     @Id
@@ -66,12 +84,12 @@ public class Contact {
     @Column(name = "consent_status", nullable = false)
     private ConsentStatus consentStatus = ConsentStatus.PENDING;
 
-    @jakarta.persistence.OneToMany(
+    @OneToMany(
             mappedBy = "contact",
-            cascade = jakarta.persistence.CascadeType.ALL,
+            cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private java.util.Set<ContactTag> contactTags = new java.util.HashSet<>();
+    private Set<ContactTag> contactTags = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
@@ -79,5 +97,4 @@ public class Contact {
             this.trackingId = UUID.randomUUID();
         }
     }
-
 }
