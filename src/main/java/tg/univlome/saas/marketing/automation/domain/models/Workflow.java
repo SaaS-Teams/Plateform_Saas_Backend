@@ -29,6 +29,9 @@ public class Workflow {
     @Builder.Default
     private UUID trackingId = UUID.randomUUID();
 
+    @Column(name = "workspace_tracking_id")
+    private UUID workspaceTrackingId;
+
     @Column(nullable = false)
     private String name;
 

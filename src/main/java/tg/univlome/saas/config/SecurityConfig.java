@@ -30,6 +30,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final RateLimitFilter rateLimitFilter;
+    private final tg.univlome.saas.shared.security.tenant.TenantFilter tenantFilter;
 
     private static final String[] PUBLIC_ENDPOINTS = {
         "/api/v1/auth/**",
@@ -59,7 +60,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(tenantFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

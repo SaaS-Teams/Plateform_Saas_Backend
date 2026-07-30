@@ -32,6 +32,9 @@ public class Contact {
     @Column(name = "tracking_id", unique = true, nullable = false, updatable = false)
     private UUID trackingId;
 
+    @Column(name = "workspace_tracking_id")
+    private UUID workspaceTrackingId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

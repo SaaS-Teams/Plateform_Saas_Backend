@@ -22,6 +22,9 @@ public class Campagne {
     @Column(nullable = false, unique = true, updatable = false)
     private UUID trackingId = UUID.randomUUID();
 
+    @Column(name = "workspace_tracking_id")
+    private UUID workspaceTrackingId;
+
     @Column(nullable = false)
     private String nom;
 
