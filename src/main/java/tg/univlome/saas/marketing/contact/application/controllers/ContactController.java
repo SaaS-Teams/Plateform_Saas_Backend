@@ -129,4 +129,24 @@ public class ContactController {
         ImportResult result = contactService.importContactsFromCsv(file);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/{trackingId}/tags/{tagTrackingId}")
+    @Operation(summary = "Associer un tag à un contact",
+            description = "Associe un tag existant (identifié par son UUID) à un contact (identifié par son UUID).")
+    public ResponseEntity<Void> addTagToContact(
+            @Parameter(description = "UUID public du contact") @PathVariable UUID trackingId,
+            @Parameter(description = "UUID public du tag") @PathVariable UUID tagTrackingId) {
+        contactService.addTagToContact(trackingId, tagTrackingId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/search")
+    @Operation(summary = "Recherche filtrée et paginée des contacts",
+            description = "Recherche dynamique des contacts par terme (nom, prénom, email) et par liste de tags (UUIDs).")
+    public ResponseEntity<Page<ContactResponse>> searchContacts(
+            @RequestBody tg.univlome.saas.marketing.contact.application.dtos.request.ContactFilterRequest filter,
+            @Parameter(description = "Paramètres de pagination (page, size, sort)") Pageable pageable) {
+        Page<ContactResponse> response = contactService.searchContacts(filter, pageable);
+        return ResponseEntity.ok(response);
+    }
 }

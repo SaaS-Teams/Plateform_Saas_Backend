@@ -63,6 +63,13 @@ public class Contact {
     @Column(name = "consent_status", nullable = false)
     private ConsentStatus consentStatus = ConsentStatus.PENDING;
 
+    @jakarta.persistence.OneToMany(
+            mappedBy = "contact",
+            cascade = jakarta.persistence.CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private java.util.Set<ContactTag> contactTags = new java.util.HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         if (this.trackingId == null) {

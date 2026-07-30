@@ -16,6 +16,18 @@ public class ContactMapper {
             throw new IllegalArgumentException("Le contact ne peut pas être null");
         }
 
+        java.util.Set<tg.univlome.saas.marketing.contact.application.dtos.response.TagResponse> tagResponses = new java.util.HashSet<>();
+        if (contact.getContactTags() != null) {
+            tagResponses = contact.getContactTags().stream()
+                    .filter(ct -> ct.getTag() != null)
+                    .map(ct -> new tg.univlome.saas.marketing.contact.application.dtos.response.TagResponse(
+                            ct.getTag().getTrackingId(),
+                            ct.getTag().getName(),
+                            ct.getTag().getColor()
+                    ))
+                    .collect(java.util.stream.Collectors.toSet());
+        }
+
         return new ContactResponse(
                 contact.getTrackingId(),
                 contact.getEmail(),
@@ -24,6 +36,7 @@ public class ContactMapper {
                 contact.getCity(),
                 contact.getCountry(),
                 contact.getConsentStatus(),
+                tagResponses,
                 contact.getCreatedAt()
         );
     }

@@ -5,10 +5,11 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import tg.univlome.saas.marketing.contact.domain.enums.ConsentStatus;
 import tg.univlome.saas.marketing.contact.domain.models.Contact;
 
-public interface ContactRepository extends JpaRepository<Contact, Long> {
+public interface ContactRepository extends JpaRepository<Contact, Long>, JpaSpecificationExecutor<Contact> {
 
     Optional<Contact> findByTrackingId(UUID trackingId);
 

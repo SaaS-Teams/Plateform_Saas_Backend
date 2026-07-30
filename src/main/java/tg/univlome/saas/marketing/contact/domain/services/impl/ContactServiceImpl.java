@@ -37,6 +37,8 @@ public class ContactServiceImpl implements ContactService {
     private final ContactRepository contactRepository;
     private final ContactMapper contactMapper;
     private final ConsentLogService consentLogService;
+    private final tg.univlome.saas.marketing.contact.repositories.TagRepository tagRepository;
+    private final tg.univlome.saas.marketing.contact.repositories.ContactTagRepository contactTagRepository;
 
     /**
      * Crée un nouveau contact pour la plateforme marketing.
@@ -237,5 +239,69 @@ public class ContactServiceImpl implements ContactService {
             LOG.warn("Erreur lors de l'enregistrement du contact importé (email={})", email, e);
             return false;
         }
+    }
+
+    @Override
+    @Transactional
+    public void addTagToContact(UUID contactTrackingId, UUID tagTrackingId) {
+        LOG.info("Ajout du tag [{}] au contact [{}]", tagTrackingId, contactTrackingId);
+
+        Contact contact = contactRepository.findByTrackingId(contactTrackingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Contact non trouvé pour le trackingId : " + contactTrackingId));
+
+        tg.univlome.saas.marketing.contact.domain.models.Tag tag = tagRepository.findByTrackingId(tagTrackingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tag non trouvé pour le trackingId : " + tagTrackingId));
+
+        boolean alreadyAssociated = contactTagRepository
+                .existsByContactTrackingIdAndTagTrackingId(contactTrackingId, tagTrackingId);
+        if (!alreadyAssociated) {
+            tg.univlome.saas.marketing.contact.domain.models.ContactTag contactTag =
+                    new tg.univlome.saas.marketing.contact.domain.models.ContactTag(contact, tag);
+            contactTagRepository.save(contactTag);
+            LOG.info("Tag [{}] associé avec succès au contact [{}]", tagTrackingId, contactTrackingId);
+        } else {
+            LOG.info("Le contact [{}] possède déjà le tag [{}]", contactTrackingId, tagTrackingId);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ContactResponse> searchContacts(
+            tg.univlome.saas.marketing.contact.application.dtos.request.ContactFilterRequest filter,
+            Pageable pageable) {
+
+        LOG.info("Recherche de contacts avec filtres dynamiques (search='{}', tagTrackingIds={})",
+                filter != null ? filter.search() : null,
+                filter != null ? filter.tagTrackingIds() : null);
+
+        org.springframework.data.jpa.domain.Specification<Contact> spec = (root, query, cb) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (filter != null) {
+                // Recherche textuelle sur email, firstName ou lastName
+                if (filter.search() != null && !filter.search().isBlank()) {
+                    String searchTerm = "%" + filter.search().trim().toLowerCase() + "%";
+                    jakarta.persistence.criteria.Predicate searchPredicate = cb.or(
+                            cb.like(cb.lower(root.get("email")), searchTerm),
+                            cb.like(cb.lower(root.get("firstName")), searchTerm),
+                            cb.like(cb.lower(root.get("lastName")), searchTerm)
+                    );
+                    predicates.add(searchPredicate);
+                }
+
+                // Filtrage par liste de UUIDs de Tags
+                if (filter.tagTrackingIds() != null && !filter.tagTrackingIds().isEmpty()) {
+                    jakarta.persistence.criteria.Join<Contact,
+                            tg.univlome.saas.marketing.contact.domain.models.ContactTag> tagJoin = root.join("contactTags");
+                    predicates.add(tagJoin.get("tag").get("trackingId").in(filter.tagTrackingIds()));
+                }
+            }
+
+            query.distinct(true);
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        Page<Contact> contactsPage = contactRepository.findAll(spec, pageable);
+        return contactsPage.map(contactMapper::toResponse);
     }
 }
