@@ -10,6 +10,11 @@ import tg.univlome.saas.web.dtos.auth.UserResponse;
 public interface AuthService {
 
     /**
+     * Inscription d'un nouvel utilisateur et provisionnement automatique de son Workspace d'entreprise.
+     */
+    AuthResponse register(tg.univlome.saas.web.dtos.auth.RegisterRequest request);
+
+    /**
      * Authentifie un utilisateur et génère un token JWT enrichi du statut d'onboarding.
      */
     AuthResponse login(LoginRequest request);

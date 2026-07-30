@@ -25,6 +25,7 @@ public class MobileOnboardingServiceImpl implements MobileOnboardingService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final tg.univlome.saas.shared.repositories.WorkspaceRepository workspaceRepository;
 
     @Override
     @Transactional
@@ -35,16 +36,27 @@ public class MobileOnboardingServiceImpl implements MobileOnboardingService {
             throw new ConflictException("Un compte existe déjà avec l'adresse e-mail : " + request.email());
         }
 
+        tg.univlome.saas.shared.security.tenant.TenantContextHolder.clear();
+
+        tg.univlome.saas.shared.domain.models.Workspace workspace = workspaceRepository.save(
+                tg.univlome.saas.shared.domain.models.Workspace.builder()
+                        .name("Espace de " + request.email())
+                        .active(true)
+                        .build()
+        );
+
         String encodedPassword = passwordEncoder.encode(request.password());
 
         User newUser = User.builder()
                 .email(request.email())
                 .password(encodedPassword)
+                .workspaceTrackingId(workspace.getTrackingId())
                 .onboardingCompleted(false)
                 .build();
 
         User savedUser = userRepository.save(newUser);
-        log.info("[ONBOARDING MOBILE] Étape 1 réussie — onboardingUuid: [{}]", savedUser.getOnboardingUuid());
+        log.info("[ONBOARDING MOBILE] Étape 1 réussie — onboardingUuid: [{}], workspaceTrackingId: [{}]",
+                savedUser.getOnboardingUuid(), workspace.getTrackingId());
 
         return new OnboardingResponse(savedUser.getOnboardingUuid(), savedUser.getOnboardingCompleted());
     }
