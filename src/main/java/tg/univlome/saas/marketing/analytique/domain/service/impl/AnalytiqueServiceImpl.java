@@ -1,70 +1,72 @@
 package tg.univlome.saas.marketing.analytique.domain.service.impl;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tg.univlome.saas.marketing.analytique.application.dtos.response.DailyStats;
 import tg.univlome.saas.marketing.analytique.application.dtos.response.DashboardResponse;
+import tg.univlome.saas.marketing.analytique.domain.enums.EmailEventType;
 import tg.univlome.saas.marketing.analytique.domain.service.AnalytiqueService;
+import tg.univlome.saas.marketing.analytique.repositories.EmailEventLogRepository;
 import tg.univlome.saas.marketing.analytique.repositories.projections.DailyStatsProjection;
-import tg.univlome.saas.marketing.campagne.domain.enums.CampagneStatus;
-import tg.univlome.saas.marketing.campagne.repositories.CampagneRepository;
-import tg.univlome.saas.marketing.email.domain.enums.EmailStatus;
-import tg.univlome.saas.marketing.email.repositories.EmailLogRepository;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnalytiqueServiceImpl implements AnalytiqueService {
 
-    private final CampagneRepository campagneRepository;
-    private final EmailLogRepository emailLogRepository;
-
-    private static final double PERCENTAGE_MULTIPLIER = 100.0;
+    private final EmailEventLogRepository emailEventLogRepository;
 
     @Override
     @Transactional(readOnly = true)
     public DashboardResponse getDashboardData() {
-        log.info("Génération des données du tableau de bord analytique");
+        log.info("Génération des données du tableau de bord analytique via AnalytiqueService");
 
-        long totalCampaigns = campagneRepository.count();
-        long draftCampaigns = campagneRepository.countByStatut(CampagneStatus.BROUILLON);
-        long scheduledCampaigns = campagneRepository.countByStatut(CampagneStatus.PROGRAMMEE);
-        long sentCampaigns = campagneRepository.countByStatut(CampagneStatus.TERMINEE);
+        long totalSent = emailEventLogRepository.countByEventType(EmailEventType.DELIVERED);
+        long totalOpened = emailEventLogRepository.countByEventType(EmailEventType.OPENED);
+        long totalClicked = emailEventLogRepository.countByEventType(EmailEventType.CLICKED);
+        long totalBounced = emailEventLogRepository.countByEventType(EmailEventType.BOUNCED);
 
-        long totalEmailsSent = emailLogRepository.count();
-        long totalSuccessfulEmails = emailLogRepository.countByStatus(EmailStatus.SENT);
-        long totalFailedEmails = emailLogRepository.countByStatus(EmailStatus.FAILED);
+        double openRate = totalSent > 0 ? (double) totalOpened / totalSent * 100.0 : 0.0;
+        double clickRate = totalSent > 0 ? (double) totalClicked / totalSent * 100.0 : 0.0;
 
-        double overallSuccessRate = 0.0;
-        if (totalEmailsSent > 0) {
-            overallSuccessRate = ((double) totalSuccessfulEmails / totalEmailsSent) * PERCENTAGE_MULTIPLIER;
-            overallSuccessRate = Math.round(overallSuccessRate * PERCENTAGE_MULTIPLIER) / PERCENTAGE_MULTIPLIER;
-        }
+        openRate = Math.round(openRate * 100.0) / 100.0;
+        clickRate = Math.round(clickRate * 100.0) / 100.0;
 
-        List<DailyStatsProjection> projections = emailLogRepository.getDailyStatistics();
-
-        List<DailyStats> dailyStatsList = projections.stream()
+        List<DailyStatsProjection> projections = emailEventLogRepository.findDailyStatsGroupedByDate();
+        List<DailyStats> dailyStatsList = (projections != null && !projections.isEmpty())
+                ? projections.stream()
                 .map(p -> new DailyStats(
-                        p.getDate(),
-                        p.getSuccessCount(),
-                        p.getFailureCount()
+                        parseDateSafely(p.getDate()),
+                        p.getOpens(),
+                        p.getClicks()
                 ))
-                .collect(Collectors.toList());
+                .toList()
+                : Collections.emptyList();
 
         return new DashboardResponse(
-                totalCampaigns,
-                draftCampaigns,
-                scheduledCampaigns,
-                sentCampaigns,
-                totalEmailsSent,
-                totalSuccessfulEmails,
-                totalFailedEmails,
-                overallSuccessRate,
+                totalSent,
+                totalOpened,
+                totalClicked,
+                totalBounced,
+                openRate,
+                clickRate,
                 dailyStatsList
         );
+    }
+
+    private LocalDate parseDateSafely(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return LocalDate.now();
+        }
+        try {
+            return LocalDate.parse(dateStr);
+        } catch (Exception e) {
+            return LocalDate.now();
+        }
     }
 }

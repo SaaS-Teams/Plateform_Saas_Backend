@@ -1,10 +1,10 @@
 package tg.univlome.saas.marketing.analytique.application.dtos.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record DailyStats(
-        LocalDateTime date,
-        long successCount,
-        long failureCount
+        LocalDate date,
+        long opens,
+        long clicks
 ) {
 }
