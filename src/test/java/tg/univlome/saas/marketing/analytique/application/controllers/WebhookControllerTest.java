@@ -31,6 +31,15 @@ class WebhookControllerTest {
     @MockBean
     private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
+    @MockBean
+    private tg.univlome.saas.shared.security.RateLimitFilter rateLimitFilter;
+
+    @MockBean
+    private tg.univlome.saas.shared.security.tenant.TenantFilter tenantFilter;
+
+    @MockBean
+    private tg.univlome.saas.shared.repositories.UserRepository userRepository;
+
     @Test
     @WithMockUser
     void shouldReturnOkWhenReceivingWebhookEvents() throws Exception {
