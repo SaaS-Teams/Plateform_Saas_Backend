@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tg.univlome.saas.marketing.reseauxsociaux.application.dtos.SocialOutreachRequest;
-import tg.univlome.saas.marketing.reseauxsociaux.domain.models.SocialNetworkType;
 
 @Slf4j
 @Service
@@ -29,7 +28,7 @@ public class SocialOutreachService {
         log.info("Message généré par l'IA : \n{}", request.messageContent());
 
         try {
-            if (request.networkType() == SocialNetworkType.SANDBOX_TEST) {
+            if ("sandbox_test".equalsIgnoreCase(request.networkType())) {
                 // Test réel sur un endpoint sandbox gratuit pour valider le flux réseau
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);

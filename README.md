@@ -1,268 +1,194 @@
-# 🚀 SaaS Marketing Platform
+# 🚀 SaaS Marketing Platform — Core Backend & Microservices
 
-Plateforme SaaS de gestion du marketing digital qui aide les entreprises à mieux gérer leur marketing en rassemblant en un seul endroit la gestion des contacts, les campagnes (emails, réseaux sociaux, SMS), l'analyse des résultats et l'automatisation des tâches.
+Plateforme SaaS de gestion du marketing digital de nouvelle génération. Elle rassemble la gestion CRM des contacts (conforme RGPD), l'automatisation comportementale par workflows (moteur de règles & Quartz Scheduler), l'ingestion multi-fournisseurs de webhooks, l'IA générative (Spring AI & Mistral AI) et prédictive (Microservice Python Scikit-Learn), la publication sur réseaux sociaux (chiffrement AES-256) et les tableaux de bord analytiques temps réel (MongoDB).
 
-**Stack** : Java 21 · Spring Boot 3.5 · PostgreSQL · JWT · Spring Modulith · Maven  
+**Stack** : Java 21 · Spring Boot 3.5 · PostgreSQL · MongoDB · Redis · RabbitMQ · Quartz · Python 3.12 · FastAPI · Scikit-Learn · Docker  
 **Organisation** : [SaaS-Teams](https://github.com/SaaS-Teams)
 
 ---
 
 ## 📋 Table des matières
 
-1. [Prérequis](#prérequis)
-2. [Installation locale](#installation-locale)
-3. [Structure du projet](#structure-du-projet)
-4. [Modules](#modules)
-5. [Conventions — lire absolument](#conventions--lire-absolument)
-6. [Workflow Git](#workflow-git)
-7. [Pull Requests](#pull-requests)
-8. [CI / CD](#ci--cd)
-9. [Variables d'environnement](#variables-denvironnement)
-10. [Documentation API](#documentation-api)
-11. [Contact & ownership des modules](#contact--ownership-des-modules)
+1. [Architecture Globale & Microservices](#-architecture-globale--microservices)
+2. [Prérequis Système](#-prérequis-système)
+3. [Installation & Démarrage rapide](#-installation--démarrage-rapide)
+4. [Structure du Code Base (Clean Architecture)](#-structure-du-code-base-clean-architecture)
+5. [Modules & Responsabilités](#-modules--responsabilités)
+6. [Sécurité & Multi-Tenancy (Hibernate Filter & AES-256)](#-sécurité--multi-tenancy-hibernate-filter--aes-256)
+7. [Microservice IA Prédictive (FastAPI & Mistral AI)](#-microservice-ia-prédictive-fastapi--mistral-ai)
+8. [Variables d'environnement](#-variables-denvironnement)
+9. [Documentation API & Endpoints OpenAPI](#-documentation-api--endpoints-openapi)
+10. [Conventions, Workflow Git & CI/CD](#-conventions-workflow-git--cicd)
 
 ---
 
-## 📦 Prérequis
+## 🏗️ Architecture Globale & Microservices
+
+La plateforme repose sur une architecture découplée et robuste :
+
+- **Monolithe Modulaire Spring Boot 3 (Port 8080)** : Gestion du CRM, des campagnes, de la sécurité multi-tenant, des workflows d'automation et de l'ingestion.
+- **Microservice IA Prédictive Python FastAPI (Port 8000)** : Moteur d'inférence ML (Lead Scoring et Churn Risk par Random Forest) et intégration de l'API officielle Mistral AI (`mistral-small-latest`).
+- **Services d'Infrastructure** :
+  - **PostgreSQL 16** : Base de données relationnelle principale avec filtrage automatique Hibernate par Tenant (`workspace_tracking_id`).
+  - **MongoDB 7** : Ingestion à haute fréquence des journaux d'événements et statistiques d'emails/webhooks.
+  - **Redis 7** : Cache distribué et Rate Limiting HTTP (Bucket4j).
+  - **RabbitMQ 3** : Broker de messages pour les étapes de workflow asynchrones avec gestion de Dead Letter Queue (DLQ).
+  - **Quartz Scheduler (JDBC Store)** : Gestion des nœuds de temporisation et de reprise des workflows d'automation.
+
+---
+
+## 📦 Prérequis Système
 
 | Outil | Version minimale |
-|-------|-----------------|
-| Java (JDK) | 21+ |
-| Maven | 3.9+ |
-| Docker & Docker Compose | 24+ |
-| Git | 2.40+ |
+|:---|:---|
+| **Java (JDK)** | 21+ |
+| **Python** | 3.10+ |
+| **Maven** | 3.9+ |
+| **Docker & Docker Compose** | 24+ |
+| **Git** | 2.40+ |
 
 ---
 
-## ⚙️ Installation locale
+## ⚙️ Installation & Démarrage rapide
+
+### 1. Démarrer les services d'infrastructure (Docker)
 
 ```bash
-# 1. Cloner le repo
-git clone https://github.com/SaaS-Teams/Plateform_Saas_Backend.git
-cd Plateform_Saas_Backend
-
-# 2. Démarrer PostgreSQL avec Docker
 docker-compose up -d
-
-# 3. Copier le fichier d'environnement
-cp .env.example .env
-# Remplir les valeurs dans .env (voir section Variables d'environnement)
-
-# 4. Build et lancement
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-
-# 5. Vérifier que l'API répond
-curl http://localhost:8080/api/health
-
-# 6. Swagger UI
-open http://localhost:8080/swagger-ui.html
 ```
 
-> **Docker doit être démarré** avant de lancer l'application.  
-> La base de données est automatiquement créée au démarrage.
-
----
-
-## 📁 Structure du projet
-
-```
-src/main/java/tg/univlome/saas/
-├── config/                    # Configuration globale (Security, Swagger, Async)
-├── marketing/
-│   ├── authentification/      # JWT, gestion utilisateurs — OWNER: Senior
-│   ├── contact/               # Gestion des contacts — OWNER: Senior
-│   │   ├── application/
-│   │   │   ├── controllers/
-│   │   │   ├── dtos/
-│   │   │   └── mappers/
-│   │   ├── domain/
-│   │   │   ├── models/
-│   │   │   ├── services/
-│   │   │   └── enums/
-│   │   └── repositories/
-│   ├── campagne/              # Gestion des campagnes marketing — OWNER: Senior
-│   ├── email/                 # Envoi et gestion des emails — OWNER: Junior
-│   ├── reseaux_sociaux/       # Intégration réseaux sociaux — OWNER: Junior
-│   ├── analytique/            # Tableaux de bord et statistiques — OWNER: Junior
-│   └── shared/                # Composants partagés — OWNER: Senior
-│       ├── exception/         # GlobalExceptionHandler + hiérarchie exceptions
-│       ├── response/          # ApiResponse<T>
-│       └── util/              # Classes utilitaires sans état
-└── SaasApplication.java
-```
-
----
-
-## 📖 Modules
-
-Le projet est organisé en modules suivant l'architecture **Spring Modulith** :
-
-| Module | Description | Responsable |
-|--------|-------------|-------------|
-| `authentification` | JWT, authentification, gestion des utilisateurs | Senior |
-| `contact` | CRUD contacts, import, segmentation | Senior |
-| `campagne` | Création et planification des campagnes | Senior |
-| `email` | Envoi d'emails, templates, tracking | Junior |
-| `reseaux_sociaux` | Intégration Facebook, Instagram, Twitter | Junior |
-| `analytique` | Statistiques, taux d'ouverture, rapports | Junior |
-| `shared` | Exceptions, réponses API, utilitaires communs | Senior |
-
----
-
-## 📝 Conventions — lire absolument
-
-> Voir **[CONTRIBUTING.md](./CONTRIBUTING.md)** pour le détail complet.
-
-**Résumé rapide :**
-- Une feature = une branche = une issue GitHub
-- Nommage branche : `feature/module-description` ou `fix/module-description`
-- Commits : format Conventional Commits (`feat(module):`, `fix(module):`, `test:`, `docs:`, `chore:`)
-- Toute PR doit passer le CI avant d'être mergée
-- Code review obligatoire : 1 reviewer minimum (Senior review les PRs critiques)
-- Jamais de push direct sur `main` ou `develop`
-
----
-
-## 🌿 Workflow Git
-
-```
-main          ← production uniquement, protégée
-develop       ← branche d'intégration principale
-feature/*     ← nouvelles fonctionnalités
-fix/*         ← corrections de bugs
-test/*        ← ajout de tests uniquement
-docs/*        ← documentation uniquement
-chore/*       ← maintenance technique
-```
-
-**Cycle de travail quotidien :**
+### 2. Démarrer le Backend Spring Boot 3
 
 ```bash
-# 1. Toujours partir de develop à jour
-git checkout develop
-git pull origin develop
+# Copier et configurer les variables d'environnement
+cp .env.example .env
 
-# 2. Créer ta branche depuis develop
-git checkout -b feature/contact-import-csv
+# Lancer la compilation et le serveur local
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+*Le serveur écoute sur : `http://localhost:8080`*
 
-# 3. Coder, committer régulièrement
-git add .
-git commit -m "feat(contact): add CSV import with validation"
+### 3. Démarrer le Microservice IA Python FastAPI
 
-# 4. Pousser ta branche
-git push origin feature/contact-import-csv
+```bash
+cd ../Plateform_Saas_AI_Predictive
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+*Le microservice écoute sur : `http://localhost:8000`*
 
-# 5. Ouvrir une Pull Request sur GitHub vers develop
+---
+
+## 📁 Structure du Code Base (Clean Architecture)
+
+```plaintext
+src/main/java/tg/univlome/saas/
+├── config/                      # Configurations Spring (Async, Security, RestTemplate, RabbitMQ, Cors, OpenAPI)
+├── marketing/
+│   ├── ai/                      # IA Générative (Spring AI) & Client HTTP vers Microservice Python (PythonAiPredictiveClient)
+│   ├── analytique/              # Pipeline d'agrégation MongoDB pour le Dashboard analytique temps réel
+│   ├── automation/              # Moteur d'Automation (Workflows, RuleEngine 7 opérateurs, Quartz Scheduler, RabbitMQ Consumers/DLQ)
+│   ├── campagne/                # Gestion des campagnes marketing et suivi de statut
+│   ├── contact/                 # CRM Contacts, Segments (Many-to-Many), Tags, Logs de consentement RGPD, Specifications JPA
+│   ├── email/                   # Service d'expédition d'emails transactionnels (SendGrid API v3)
+│   ├── reseauxsociaux/          # Module Réseaux Sociaux dynamique (SocialAccount chiffré AES-256, SocialPlatformPort, SocialPublishService)
+│   └── webhooks/                # Contrôleur d'ingestion de Webhooks (SendGrid, Shopify, Custom) & Inbound Event Consumers
+├── shared/                      # Noyau partagé & Infrastructure Multi-Tenant
+│   ├── domain/models/           # Entités User, Workspace
+│   ├── repositories/            # UserRepository, WorkspaceRepository
+│   ├── security/                # JwtUtils, JwtAuthenticationFilter, RateLimitFilter (Bucket4j), CryptoService (AES-256)
+│   │   └── tenant/              # Multi-Tenancy (TenantContextHolder, TenantFilter, TenantFilterAspect, TenantListener)
+│   └── exceptions/              # Hiérarchie des exceptions globales & GlobalExceptionHandler
+└── SaasApplication.java         # Point d'entrée principal Spring Boot 3
 ```
 
 ---
 
-## 🔀 Pull Requests
+## 📖 Modules & Responsabilités
 
-- **Titre** : `[MODULE] Description courte` → ex: `[CONTACT] Add CSV import`
-- **Template** : remplir le template automatique (voir `.github/pull_request_template.md`)
-- **Lier l'issue** : mentionner `Closes #42` dans la description
-- **Taille** : max 400 lignes de diff — découper si plus grand
-- **Tests** : toute PR doit inclure ses tests unitaires
-- **Reviewer** : assigner le Senior pour les modules `authentification`, `shared`
+| Module | Description | Technologies Clés |
+|:---|:---|:---|
+| `shared.security.tenant` | Isolation stricte des données par espace de travail (Multi-Tenancy). | ThreadLocal, Hibernate 6 `@FilterDef`/`@Filter`, AOP Aspect |
+| `shared.security.crypto` | Chiffrement symétrique fort des jetons d'accès sociaux. | AES-256 GCM / CBC, `CryptoService` |
+| `marketing.contact` | Gestion CRM des prospects, segmentation dynamique, audit RGPD et import/export CSV. | JPA Specification, RGPD ConsentLog, CSV Mapper |
+| `marketing.automation` | Conception et exécution de workflows marketing automatisés sous forme de DAG. | JSONB Postgres, Quartz JDBC, RabbitMQ DLQ |
+| `marketing.webhooks` | Réception et traitement réactif d'événements entrants depuis des plateformes externes. | Handlers Webhooks, Inbound Queue |
+| `marketing.ai` | Copywriting d'emails marketing par IA et pont HTTP avec le microservice Python. | Spring AI `ChatClient`, `PythonAiPredictiveClient` |
+| `marketing.reseauxsociaux` | Module d'outreach et de publication sociale à architecture ouverte (sans Enum). | Pattern Strategy, `SocialPlatformPort`, Spring Registry |
+| `marketing.analytique` | Calcul des indicateurs de performance et séries temporelles de conversion. | MongoDB `@Aggregation` Pipeline, REST Dashboard API |
 
 ---
 
-## 🔄 CI / CD
+## 🛡️ Sécurité & Multi-Tenancy (Hibernate Filter & AES-256)
 
-À chaque Pull Request vers `develop` ou `main` :
+1. **Multi-Tenancy Transparent** : Chaque requête authentifiée extrait le tenant UUID (`workspaceTrackingId`) via `TenantFilter`. L'aspect AOP `TenantFilterAspect` active automatiquement le filtre Hibernate sur toutes les requêtes Spring Data Repositories.
+2. **Chiffrement des Jetons Sociaux (`CryptoService`)** : Les jetons d'accès (`accessToken` et `refreshToken`) enregistrés via `SocialController` sont systématiquement chiffrés en base de données en AES-256 et déchiffrés uniquement en mémoire transitoire au moment de la publication.
 
-1. **Build** : `mvn clean compile`
-2. **Tests** : `mvn test` (JUnit 5 + Mockito)
-3. **Coverage** : JaCoCo — minimum 70% sur les services
+---
 
-> La PR ne peut pas être mergée si le CI est rouge.
+## 🤖 Microservice IA Prédictive (FastAPI & Mistral AI)
+
+Le microservice Python `Plateform_Saas_AI_Predictive` héberge les modèles d'inférence mathématique et l'intelligence sémantique :
+
+- **Lead Scoring Hybride** : Évalue le score de conversion d'un prospect à partir de son comportement site et applique un boost de **+15.0%** si Mistral AI (`mistral-small-latest`) identifie une intention d'achat.
+- **Churn Risk Prediction** : Modèle Random Forest Scikit-Learn calculant la probabilité de désabonnement client (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
 
 ---
 
 ## 🔧 Variables d'environnement
 
-Copier `.env.example` → `.env` (**ne jamais committer `.env`**).
+Copier `.env.example` vers `.env` (*ne jamais committer `.env`*).
 
-| Variable | Description |
-|----------|-------------|
-| `DB_URL` | URL JDBC PostgreSQL (`jdbc:postgresql://localhost:5432/saas_db`) |
-| `DB_USERNAME` | Utilisateur base de données |
-| `DB_PASSWORD` | Mot de passe base de données |
-| `JWT_SECRET` | Clé secrète JWT (min 256 bits) |
-| `JWT_ACCESS_EXPIRATION` | Durée access token en ms (défaut: 900000 = 15min) |
-| `JWT_REFRESH_EXPIRATION` | Durée refresh token en ms (défaut: 604800000 = 7j) |
-| `MAIL_HOST` | Serveur SMTP (ex: smtp.gmail.com) |
-| `MAIL_PORT` | Port SMTP (ex: 587) |
-| `MAIL_USERNAME` | Email transactionnel |
-| `MAIL_PASSWORD` | Mot de passe SMTP |
-| `SMS_API_KEY` | Clé API SMS (à intégrer) |
-| `SOCIAL_API_KEY` | Clé API réseaux sociaux (à intégrer) |
+```properties
+# Base de données & Redis
+DB_URL=jdbc:postgresql://localhost:5432/saas_db
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+REDIS_HOST=localhost
+REDIS_PORT=6380
 
----
+# Sécurité & Chiffrement
+JWT_SECRET=VotreCleSecreteJWT32OctetsMinimumSecurisee2026!
+CRYPTO_SECRET_KEY=SaasMarketingSecretKeyForAES256Encryption2026!
 
-## 📚 Documentation API
-
-### Swagger UI
-Interface interactive disponible après démarrage :
-
-**http://localhost:8080/swagger-ui.html**
-
-### OpenAPI JSON
-
-**http://localhost:8080/api-docs**
-
-### Endpoints principaux
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/health` | Health check |
-| `POST` | `/api/v1/auth/login` | Authentification |
-| `POST` | `/api/v1/auth/refresh` | Renouveler le token |
-| `GET` | `/api/v1/contacts` | Liste des contacts |
-| `POST` | `/api/v1/contacts` | Créer un contact |
-| `GET` | `/api/v1/campagnes` | Liste des campagnes |
-| `POST` | `/api/v1/campagnes` | Créer une campagne |
-| `POST` | `/api/v1/campagnes/{id}/envoyer` | Envoyer une campagne |
-| `GET` | `/api/v1/analytique/dashboard` | Tableau de bord |
-
----
-
-## 🤝 Contact & ownership des modules
-
-| Module | Responsable | Rôle |
-|--------|-------------|------|
-| `authentification`, `contact`, `campagne`, `shared` | À définir | Senior |
-| `email`, `reseaux_sociaux`, `analytique` | À définir | Junior |
-
-> En cas de doute sur un module, ouvrir une issue avec le label `question` et tagger le owner.
-
----
-
-## 🔨 Commandes utiles
-
-```bash
-# Nettoyer et compiler
-./mvnw clean compile
-
-# Exécuter les tests
-./mvnw test
-
-# Construire le projet (sans tests)
-./mvnw clean install -DskipTests
-
-# Démarrer l'application (profil dev)
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-
-# Construire un JAR exécutable
-./mvnw clean package
-
-# Démarrer/arrêter Docker
-docker-compose up -d
-docker-compose down
+# Intégrations Externes
+SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxx
+MISTRAL_API_KEY=your_mistral_api_key_here
 ```
 
+---
+
+## 📚 Documentation API & Endpoints OpenAPI
+
+Documentation interactive Swagger UI disponible sur : **`http://localhost:8080/swagger-ui.html`**
+
+### Endpoints Principaux
+
+| Catégorie | Méthode | Endpoint | Description |
+|:---|:---|:---|:---|
+| **Authentification** | `POST` | `/api/v1/auth/register` | Inscription avec auto-provisionnement du Workspace |
+| **Authentification** | `POST` | `/api/v1/auth/login` | Connexion et émission du token JWT |
+| **CRM Contacts** | `GET` | `/api/v1/contacts` | Liste paginée des contacts filtrés par Tenant |
+| **CRM Contacts** | `POST` | `/api/v1/contacts/search` | Recherche dynamique par critères multiples (Specification) |
+| **CRM Contacts** | `POST` | `/api/v1/contacts/import` | Importation de contacts en masse par fichier CSV |
+| **Automation** | `POST` | `/api/v1/workflows` | Sauvegarde d'un canvas de workflow (JSONB) |
+| **Automation** | `POST` | `/api/v1/workflows/{id}/execute` | Déclenchement de l'exécution asynchrone d'un workflow |
+| **Webhooks** | `POST` | `/api/v1/webhooks/{provider}` | Ingestion de webhooks externes (SendGrid, Shopify) |
+| **IA Générative** | `POST` | `/api/v1/ai/generate-email` | Génération de corps d'email marketing par Spring AI |
+| **Social Networks** | `POST` | `/api/v1/social/accounts` | Enregistrement d'un compte social avec chiffrement AES-256 |
+| **Social Networks** | `POST` | `/api/v1/social/publish` | Publication d'un message d'outreach sur la plateforme ciblée |
+| **Analytics** | `GET` | `/api/v1/analytics/dashboard` | Statistiques globales et séries temporelles de conversion |
 
 ---
 
-*Développé  par l'équipe SaaS Marketing Platform — SaaS-Teams*
+## 📝 Conventions, Workflow Git & CI/CD
+
+- **Conventions Commits** : Format *Conventional Commits* (`feat(...)`, `fix(...)`, `docs(...)`, `test(...)`).
+- **Audit de Code** : Validation obligatoire par Checkstyle (`./mvnw checkstyle:check`) avec **0 violation autorisée**.
+- **Couverture de Tests** : JUnit 5 + Mockito + Pytest (Microservice Python).
+
+---
+
+*Plateforme SaaS Marketing — Développé par l'équipe SaaS-Teams*

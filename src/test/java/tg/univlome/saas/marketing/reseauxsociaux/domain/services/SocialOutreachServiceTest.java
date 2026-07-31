@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import tg.univlome.saas.marketing.reseauxsociaux.application.dtos.SocialOutreachRequest;
-import tg.univlome.saas.marketing.reseauxsociaux.domain.models.SocialNetworkType;
 
 @ExtendWith(MockitoExtension.class)
 class SocialOutreachServiceTest {
@@ -28,7 +27,7 @@ class SocialOutreachServiceTest {
     void sendDirectMessage_ShouldReturnTrueForSandboxTestWhenApiIs2xx() {
         SocialOutreachRequest request = new SocialOutreachRequest(
                 "c-100",
-                SocialNetworkType.SANDBOX_TEST,
+                "sandbox_test",
                 "@john_doe",
                 "Hello from AI"
         );
@@ -44,7 +43,7 @@ class SocialOutreachServiceTest {
     void sendDirectMessage_ShouldReturnTrueForLinkedInSimulation() {
         SocialOutreachRequest request = new SocialOutreachRequest(
                 "c-101",
-                SocialNetworkType.LINKEDIN,
+                "linkedin",
                 "linkedin.com/in/johndoe",
                 "Hello LinkedIn"
         );
