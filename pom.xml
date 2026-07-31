@@ -40,6 +40,7 @@
 		<jacoco.version>0.8.12</jacoco.version>
 		<checkstyle.version>3.4.0</checkstyle.version>
 		<checkstyle-tool.version>10.20.1</checkstyle-tool.version>
+		<spring-ai.version>1.0.0-M1</spring-ai.version>
 
 		<!-- JaCoCo coverage minimum -->
 		<jacoco.coverage.minimum>0.70</jacoco.coverage.minimum>
@@ -186,11 +187,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <!-- MongoDB pour les statistiques et le tracking massif -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
@@ -231,6 +227,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <version>${spring-ai.version}</version>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -358,5 +360,16 @@
 
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 </project>
