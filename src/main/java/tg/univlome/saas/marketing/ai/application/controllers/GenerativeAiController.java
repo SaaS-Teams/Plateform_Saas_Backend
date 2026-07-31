@@ -16,6 +16,7 @@ import tg.univlome.saas.marketing.ai.domain.services.GenerativeAiService;
 
 @Slf4j
 @RestController
+
 @RequestMapping("/api/v1/ai")
 @RequiredArgsConstructor
 @Tag(name = "IA Générative", description = "Endpoints IA pour le copywriting d'emails marketing et la génération de contenu")
