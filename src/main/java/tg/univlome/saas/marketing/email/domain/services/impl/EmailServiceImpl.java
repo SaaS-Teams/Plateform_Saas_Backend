@@ -20,7 +20,7 @@ public class EmailServiceImpl implements EmailService {
     private final EmailLogRepository emailLogRepository;
     private final SendGridSender sendGridSender; // Notre nouveau sous-composant avec Retry
 
-    @Value("${sendgrid.api-key}")
+    @Value("${sendgrid.api-key:default_key}")
     private String sendGridApiKey;
 
     @Value("${app.email.sender:contact@saas-marketing.tg}")
@@ -50,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             // 2. Appel du composant isolé (gère les 3 tentatives en cas de coupure réseau)
-            sendGridSender.sendViaSendGrid(sendGridApiKey, senderEmail, message);
+            sendGridSender.sendViaSendGrid(sendGridApiKey, senderEmail, message, emailLog.getTrackingId());
 
             // 3. Si on arrive ici, c'est un succès complet
             emailLog.setStatus(EmailStatus.SENT);

@@ -9,6 +9,7 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import java.io.IOException;
+import java.util.UUID;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -28,11 +29,12 @@ public class SendGridSender {
             maxAttempts = MAX_RETRY_ATTEMPTS,
             backoff = @Backoff(delay = RETRY_DELAY_MS)
     )
-    public void sendViaSendGrid(String apiKey, String senderEmail, EmailMessage message) throws IOException {
+    public void sendViaSendGrid(String apiKey, String senderEmail, EmailMessage message, UUID trackingId) throws IOException {
         Email from = new Email(senderEmail);
         Email to = new Email(message.to());
         Content content = new Content(message.isHtml() ? "text/html" : "text/plain", message.body());
         Mail mail = new Mail(from, message.subject(), to, content);
+        mail.addCustomArg("tracking_id", trackingId.toString());
 
         SendGrid sg = new SendGrid(apiKey);
         Request request = new Request();

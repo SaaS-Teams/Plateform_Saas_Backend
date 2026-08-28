@@ -14,6 +14,7 @@ public record ContactResponse(
         String city,
         String country,
         ConsentStatus consentStatus,
+        java.util.Set<TagResponse> tags,
         LocalDateTime createdAt
 ) {
 }

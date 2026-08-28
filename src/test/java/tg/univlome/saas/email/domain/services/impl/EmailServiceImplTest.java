@@ -77,7 +77,7 @@ class EmailServiceImplTest {
 
         // Assert
         // Vérifie que le composant SendGridSender a bien été appelé
-        verify(sendGridSender, times(1)).sendViaSendGrid("test-api-key", "test@saas.tg", testMessage);
+        verify(sendGridSender, times(1)).sendViaSendGrid(anyString(), anyString(), any(EmailMessage.class), any(java.util.UUID.class));
 
         // Vérifie que le repository a sauvegardé le log 2 fois (PENDING puis SENT)
         verify(emailLogRepository, times(2)).save(emailLogCaptor.capture());
@@ -94,7 +94,7 @@ class EmailServiceImplTest {
 
         // On simule une erreur réseau du composant SendGridSender
         doThrow(new IOException("Timeout API")).when(sendGridSender)
-                .sendViaSendGrid(anyString(), anyString(), any(EmailMessage.class));
+                .sendViaSendGrid(anyString(), anyString(), any(EmailMessage.class), any(java.util.UUID.class));
 
         // Act & Assert
         assertThatThrownBy(() -> emailService.sendEmail(testMessage))

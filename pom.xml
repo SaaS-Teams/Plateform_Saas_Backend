@@ -34,11 +34,13 @@
 		<opencsv.version>5.9</opencsv.version>
 		<sendgrid.version>4.10.2</sendgrid.version>
 		<springdoc.version>2.7.0</springdoc.version>
+		<bucket4j.version>8.17.0</bucket4j.version>
 
 		<!-- Versions des plugins -->
 		<jacoco.version>0.8.12</jacoco.version>
 		<checkstyle.version>3.4.0</checkstyle.version>
 		<checkstyle-tool.version>10.20.1</checkstyle-tool.version>
+		<spring-ai.version>1.0.0-M1</spring-ai.version>
 
 		<!-- JaCoCo coverage minimum -->
 		<jacoco.coverage.minimum>0.70</jacoco.coverage.minimum>
@@ -53,6 +55,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
         <dependency>
             <groupId>com.opencsv</groupId>
@@ -186,7 +192,47 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <!-- ── RabbitMQ (Moteur d'automation et envois massifs) ─────────── -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
 
+        <!-- ── MongoDB (Données non structurées et événements sociaux) ──── -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!-- ── Elasticsearch (Moteur de tri et segmentation dynamique) ──── -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+        <!-- Redis pour le Cache et le Rate Limiting -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+		<!-- ── Bucket4j (Rate Limiting HTTP) ───────────────────── -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>${bucket4j.version}</version>
+		</dependency>
+
+		<!-- ── Quartz Scheduler (Nœud WAIT — persistance JDBC) ── -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <version>${spring-ai.version}</version>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -314,5 +360,16 @@
 
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 </project>

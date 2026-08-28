@@ -57,7 +57,7 @@ class ContactServiceImplTest {
         Contact mockContact = new Contact();
         mockContact.setEmail("test@mail.com");
 
-        ContactResponse expectedResponse = new ContactResponse(UUID.randomUUID(), "test@mail.com", "John", "Doe", "Paris", "FR", ConsentStatus.PENDING, null);
+        ContactResponse expectedResponse = new ContactResponse(UUID.randomUUID(), "test@mail.com", "John", "Doe", "Paris", "FR", ConsentStatus.PENDING, java.util.Set.of(), LocalDateTime.now());
 
         // On dicte le comportement des Mocks
         // 1. Quand on cherche l'email, on dit qu'il n'existe pas encore (Optional.empty)
@@ -97,7 +97,7 @@ class ContactServiceImplTest {
         when(contactRepository.findByEmail("doublon@mail.com")).thenReturn(Optional.of(existingContact));
 
         // --- 2. ACT & ASSERT ---
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        tg.univlome.saas.shared.exceptions.ConflictException exception = assertThrows(tg.univlome.saas.shared.exceptions.ConflictException.class, () -> {
             contactService.createContact(request, "192.168.1.1");
         });
 
@@ -118,7 +118,7 @@ class ContactServiceImplTest {
         when(contactRepository.findByTrackingId(contactId)).thenReturn(Optional.of(existingContact));
         when(contactRepository.save(any(Contact.class))).thenReturn(existingContact);
         // On triche un peu sur la réponse pour le test
-        when(contactMapper.toResponse(existingContact)).thenReturn(new ContactResponse(contactId, "test@mail.com", null, null, null, null, ConsentStatus.OPT_IN, null));
+        when(contactMapper.toResponse(existingContact)).thenReturn(new ContactResponse(contactId, "test@mail.com", null, null, null, null, ConsentStatus.OPT_IN, java.util.Set.of(), LocalDateTime.now()));
 
         // --- 2. ACT ---
         // On simule que l'utilisateur accepte les emails (OPT_IN)

@@ -107,7 +107,7 @@ class SegmentServiceImplTest {
         Page<ContactSegment> mockPage = new PageImpl<>(List.of(liaison)); // PageImpl crée une fausse "Page"
 
         when(contactSegmentRepository.findBySegmentTrackingId(segmentId, pageRequest)).thenReturn(mockPage);
-        when(contactMapper.toResponse(mockContact)).thenReturn(new ContactResponse(null, "mail", null, null, null, null, null, null));
+        when(contactMapper.toResponse(mockContact)).thenReturn(new ContactResponse(null, "mail", null, null, null, null, null, java.util.Set.of(), java.time.LocalDateTime.now()));
 
         // --- ACT ---
         Page<ContactResponse> result = segmentService.getContactsBySegment(segmentId, pageRequest);
